@@ -17,6 +17,14 @@ public class Main {
      void start() {
     	 //Parse input data
     	 Parser parser = new Parser(INPUT_PATH);
+    	 parser.Parse();
+    	 
+    	 //Run model
+    	 
+    	 
+    	 //Visualize results
+    	 
+    	 
      }
      
      public static void main(String[] argv) {
