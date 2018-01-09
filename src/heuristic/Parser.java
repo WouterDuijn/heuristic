@@ -66,8 +66,70 @@ public class Parser {
 		//Parse distance matrix
 		
 		
+		//Parse the input distances data here
+		File file = new File(input_path+DISTANCES_FILE_NAME);
+		try {
+			Scanner in = new Scanner(file);
+			out.println(input_path+DISTANCES_FILE_NAME);
+			//Skip first three header lines
+			in.nextLine();
+			in.nextLine();
+			in.nextLine();
+			
+			while (in.hasNextLine()) {
+				String line = in.nextLine();
+				Scanner line_scanner = new Scanner(line);
+				line_scanner.useDelimiter(",");
+				int id = Integer.parseInt(line_scanner.next().trim());
+				int x = Integer.parseInt(line_scanner.next().trim());
+				int y = Integer.parseInt(line_scanner.next().trim());
+				
+				//Set delimiter for city name
+				line_scanner.useDelimiter("\"");
+				line_scanner.next();
+				String name = line_scanner.next().trim();
+				
+				//Add city to cities structure
+				//cities.AddCity(new City(id, name, x, y));
+				
+			}
+			in.close();
+		}catch(FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
 		
 		//Parse passenger matrix
+		File file2 = new File(input_path+PASSENGERS_FILE_NAME);
+		try {
+			Scanner in = new Scanner(file);
+			out.println(input_path+PASSENGERS_FILE_NAME);
+			//Skip first three header lines
+			in.nextLine();
+			in.nextLine();
+			in.nextLine();
+			
+			while (in.hasNextLine()) {
+				String line = in.nextLine();
+				Scanner line_scanner = new Scanner(line);
+				line_scanner.useDelimiter(",");
+				int id = Integer.parseInt(line_scanner.next().trim());
+				int x = Integer.parseInt(line_scanner.next().trim());
+				int y = Integer.parseInt(line_scanner.next().trim());
+				
+				//Set delimiter for city name
+				line_scanner.useDelimiter("\"");
+				line_scanner.next();
+				String name = line_scanner.next().trim();
+				
+				//Add city to cities structure
+				//cities.AddCity(new City(id, name, x, y));
+				
+			}
+			in.close();
+		}catch(FileNotFoundException e) {
+			e.printStackTrace();
+		}
 		
 		
 		
