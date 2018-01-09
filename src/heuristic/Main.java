@@ -7,6 +7,8 @@ public class Main {
 	public static final int NR_PLANES = 6;
 	public static final String INPUT_PATH = "C:\\workspace\\heuristic\\inp\\";
 	
+	//tests
+	
 
      Main() {
     	 //Initialize variables
