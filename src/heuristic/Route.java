@@ -37,12 +37,9 @@ public class Route {
 		cities.add(index, city);
 		
 		//Boarding time
-		current_time+=1;
-		
+
 		//TODO: replace refuel by vector of refuel moments
-		if(refuel){
-			current_time+=1;
-		}
+
 		
 		int passenger_first_edge= passenger1 + passengers.elementAt(index-1);
 		int passenger_second_edge = passenger2 + passengers.elementAt(index);
@@ -84,6 +81,9 @@ public class Route {
 
 	public void isValidNumberPax(int i, int j, int k, int l) {
 		// TODO Auto-generated method stub
+		
+		
+		
 		
 	}
 	
