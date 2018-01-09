@@ -14,6 +14,21 @@ public class City {
 		this.y=y;
 	}
 	
+	int ID(){
+		return id;
+	}
+	
+	int X() {
+		return x;
+	}
+	
+	int Y() {
+		return y;
+	}
+	
+	String Name() {
+		return name;
+	}
 	
 
 }

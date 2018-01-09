@@ -21,9 +21,11 @@ public class Parser {
 		out = new PrintStream(System.out);
 	}
 	
-	public void ParseCities(){
+	public Cities ParseCities(){
+		//Initliaze empty Cities
+		Cities cities =new Cities();
+		
 		//Parse the input data here
-		out.println("here");
 		File file = new File(input_path+CITIES_FILE_NAME);
 		try {
 			Scanner in = new Scanner(file);
@@ -46,14 +48,16 @@ public class Parser {
 				line_scanner.next();
 				String name = line_scanner.next().trim();
 				
-				//TODO: add city to cities structure
-				City city = new City(id, name, x, y);
+				//Add city to cities structure
+				cities.AddCity(new City(id, name, x, y));
 				
 			}
 			in.close();
 		}catch(FileNotFoundException e) {
 			e.printStackTrace();
 		}
+		
+		return cities;
 		
 	}
 	
