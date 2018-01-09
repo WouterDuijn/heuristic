@@ -61,12 +61,18 @@ public class Parser {
 		
 	}
 	
-	public void ParsePassengers() {
-		//Do same as in above Parser
+	public Matrix ParseMatrices(int number_of_cities) {
+		Matrix matrix = new Matrix(number_of_cities);
+		//Parse distance matrix
+		
+		
+		
+		//Parse passenger matrix
+		
+		
+		
+		return matrix;
 	}
 	
-	public void ParseDistances() {
-		//Do same as in above Parser
-	}
 
 }

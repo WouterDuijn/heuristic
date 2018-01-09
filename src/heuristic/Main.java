@@ -16,9 +16,8 @@ public class Main {
      void start() {
     	 //Parse input data
     	 Parser parser = new Parser(INPUT_PATH);
-    	 parser.ParseCities();
-    	 parser.ParseDistances();
-    	 parser.ParsePassengers();
+    	 Cities cities = parser.ParseCities();
+    	 Matrix matrix = parser.ParseMatrices(cities.size());
     	 
     	 //Run model
     	 
