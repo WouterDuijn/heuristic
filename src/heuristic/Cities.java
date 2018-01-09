@@ -12,6 +12,9 @@ public class Cities {
 		nr_cities=0;
 	}
 	
+	City getCity(int id){
+		return cities[id];
+	}
 	
 	/**
 	 * Adds the city to the cities Object.
