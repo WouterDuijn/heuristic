@@ -1,12 +1,11 @@
 package heuristic;
 
-import java.util.Scanner;
 import java.io.PrintStream;
 
 public class Main {
 	
 	public static final int NR_PLANES = 6;
-	public static final String INPUT_PATH = "C:\\workspace\\heuristic\\inp";
+	public static final String INPUT_PATH = "C:\\workspace\\heuristic\\inp\\";
 	
 
      Main() {
@@ -17,7 +16,9 @@ public class Main {
      void start() {
     	 //Parse input data
     	 Parser parser = new Parser(INPUT_PATH);
-    	 parser.Parse();
+    	 parser.ParseCities();
+    	 parser.ParseDistances();
+    	 parser.ParsePassengers();
     	 
     	 //Run model
     	 
