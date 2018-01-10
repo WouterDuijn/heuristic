@@ -6,21 +6,24 @@ public class Route {
 	
 	private static final int DAY_LENGTH=20;
 	private static final int MAX_FUEL_DISTANCE=3199;
+	private static final int SPEED=800;
 	
 	private Vector<City> cities;
-	private Vector<Integer> refuel;
-	private Vector<Integer> tank;
+	private Vector<Integer> refuel; //
+	private Vector<Integer> tank; //number of kilometers the plane can still travel without refuel at arrival
 	double current_time=0;
 	double profit=0;
 	Vector<Integer> passengers;
+	Vector<Double> flightDuration;
 	
 	Route(City city){
 		cities.add(city);
 		cities.add(city);
 		passengers.add(0);
+		flightDuration.add(0.);
 		refuel.add(0);
 		refuel.add(0);
-		tank.add(0);
+		tank.add(MAX_FUEL_DISTANCE);
 		tank.add(0);
 	}
 	
@@ -32,14 +35,30 @@ public class Route {
 	 * @param passenger1
 	 * @param passenger2
 	 */
-	public void AddCity(City city, int index, boolean refuel, int passenger1,
+	public void AddCity(City city, int index, boolean ref, int passenger1,
 			int passenger2, double profit_increment, double distance1, double distance2){
 		cities.add(index, city);
 		
 		//Boarding time
-
-		//TODO: replace refuel by vector of refuel moments
-
+		current_time+=1;
+		//Flying time
+		double time_first_edge = distance1/SPEED;
+		double time_second_edge = distance2/SPEED;
+		
+		current_time-=flightDuration.get(index-1);
+		
+		flightDuration.setElementAt(time_second_edge, index-1);
+		flightDuration.add(index-1, time_first_edge);
+		
+		current_time = current_time + flightDuration.get(index-1) + flightDuration.get(index);
+		
+		//replace refuel by vector of refuel moments
+		if(ref){
+			refuel.add(index,1);
+			current_time+=1;
+		} else {
+			refuel.add(index,0);
+		}
 		
 		int passenger_first_edge= passenger1 + passengers.elementAt(index-1);
 		int passenger_second_edge = passenger2 + passengers.elementAt(index);
@@ -49,10 +68,9 @@ public class Route {
 		
 		profit+= profit_increment;
 		
-		
-		//TODO: minus distance of broken edge & plus two new distances
-		
 		//TODO: adjust tank
+		
+		
 	}
 	
 	public int size(){
