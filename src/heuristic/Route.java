@@ -42,8 +42,8 @@ public class Route {
 		
 		//Boarding time
 		current_time+=1;
-		//Flying time
 		
+		//Flying time
 		current_time-=distances.get(index-1)/SPEED;
 		
 		distances.setElementAt(distance2, index-1);
@@ -85,11 +85,8 @@ public class Route {
 		passengers.setElementAt(passenger_second_edge, index-1);
 		passengers.add(index-1, passenger_first_edge);
 		
-		//TODO keep track of the detours, otherwise isValidNumberPax and the profit cannot be determined 
+		//TODO keep track of the detours, otherwise isValidNumberPax and the profit cannot be determined 		
 		
-		//TODO fix way to return vector of refuels and return whether it is valid
-		
-		//TODO adjust refuel moments if later refuel moments no longer required
 		profit+= profit_increment;
 	}
 	
