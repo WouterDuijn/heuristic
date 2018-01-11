@@ -9,12 +9,12 @@ public class Route {
 	private static final int SPEED=800;
 	private static final int MAX_PASSENGERS = 199;
 	
-	private Vector<City> cities;
+	private Vector<City> cities; // kan dit niet gewoon Cities cities; worden?
 	private Vector<Integer> refuel; //
 	private Vector<Double> tank; //number of kilometers the plane can still travel without refuel at arrival
 	double current_time=0;
 	double profit=0;
-	Vector<Integer> passengers;
+	Vector<Integer> passengers; // initialize/declare vectors
 	Vector<Double> distances;
 	
 	Route(City city){
@@ -51,7 +51,7 @@ public class Route {
 		
 		current_time = current_time + distance1/SPEED + distance2/SPEED;
 		
-		//replace refuel by vector of refuel moments and adjust tank
+		//Adjust refuel moments and adjust tank
 		//check where to refuel, either in newly added city or in previous city
 		if(ref){
 			if(tank.get(index-1)-distance1<=0 && tank.get(index)-distance2<=0){

@@ -12,8 +12,8 @@ public class Cities {
 		nr_cities=0;
 	}
 	
-	City getCity(int id){
-		return cities[id];
+	City getCity(int index){
+		return cities[index];
 	}
 	
 	public int getID(int index){
