@@ -63,8 +63,8 @@ public class Route {
 		
 		tank.setElementAt(tank.get(index)-distance2,index+1);
 
-		for(int i=index+2; i<=tank.size(); i++){
-			if(tank.get(i-1) - distances.get(i) <= 0){
+		for(int i=index+2; i<=tank.size(); i++) {
+			if(tank.get(i-1) - distances.get(i) <= 0) {
 				if(refuel.get(i-1) == 0){
 					refuel.setElementAt(1, i-1);
 					tank.setElementAt(MAX_FUEL_DISTANCE, i-1);
@@ -94,25 +94,63 @@ public class Route {
 		return cities.size();
 	}
 	
+	public boolean needsRefuel(int city_id, int index) {
+		// TODO we need the distances d1 and d2 to check if we can make the flight to that city
+		return false;
+	}
 	
 	/**
 	 * 
-	 * @param i
-	 * @param j
+	 * @param city_id
+	 * @param index
 	 * @return
 	 */
-	public int isValidCityInsert(int i, int j) {
+	public int isValidCityInsert(int city_id, int index) {
 		int result=0;
 		// TODO fix way to return vector of refuels and return whether it is valid
 		//TODO adjust refuel moments if later refuel moments no longer required
+
 		//Deze TODO's kunnen niet in deze methode, omdat isValid niet betekent dat we de city ook daadwerkelijk toevoegen.
 		
+
+		//Deze 2 TODO's hierboven kunnen niet in deze methode, omdat isValid niet betekent dat we de city ook daadwerkelijk toevoegen.
+		
+		// index in Route is the index at which we check if the new city can be placed, but it is not yet added to the Route itself
+		// so a different city might be on this index at the moment
+		
+		// if city to be inserted is the same as a neighbour (city): not valid
+		if(cities.get(index-1).ID() == city_id || cities.get(index).ID() == city_id) {
+			return result;
+		} else {
+			double time = current_time;
+			if(needsRefuel(city_id, index)) {
+				time+=1;
+			}
+			// add un-, boarding time
+			time+=1;
+			
+			// subtract flying time of current flight (that will be replaced by the newly created flights)
+			time-= distances.get(index-1)/SPEED;
+			
+			// TODO we need the distances d1 and d2 here to check if we can make the flight to that city
+			
+			// add flying times of the new flights created by adding the new city to the route
+			// time = time + d1/SPEED + d2/SPEED;
+			
+			// if total time (auxiliary var. for current_time) does not exceed the day_length, it is a valid city insert.
+			if(time <= DAY_LENGTH) {
+				return result;
+			}			
+		}
+		
+		// TODO adjust value of result inside if-statements
+
 		return result;
 	}
 
 	public boolean isValidNumberPax(int index, int passengers1, int passengers2) {
 		//TODO adjust for detours
-		if(passengers.get(index-1) + passengers1 <= MAX_PASSENGERS){
+		if(passengers.get(index-1) + passengers1 <= MAX_PASSENGERS) {
 			if(passengers.get(index-1) + passengers2 <= MAX_PASSENGERS) {
 				return true;
 			}
