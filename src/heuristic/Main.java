@@ -42,7 +42,7 @@ public class Main {
     					 for(int l=9;l<199;l+=10){
     						 
     						 
-    						 //Check if city can be added using i, j, k & l
+    						 //Check if city can be added using  j, k & l
     						 
     						 route.isValidNumberPax(j,k,l);
     						 

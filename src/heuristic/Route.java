@@ -107,10 +107,6 @@ public class Route {
 		//TODO adjust refuel moments if later refuel moments no longer required
 		//Deze TODO's kunnen niet in deze methode, omdat isValid niet betekent dat we de city ook daadwerkelijk toevoegen.
 		
-		
-		
-		
-		
 		return result;
 	}
 
