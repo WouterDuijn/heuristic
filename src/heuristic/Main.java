@@ -26,16 +26,19 @@ public class Main {
     	 boolean cont = true;
     	 
     	 while(cont){
+    		 double distance1=0;
+    		 double distance2=0;
+    		 
     		 //Check for correct city, index and number of passengers
     		 for(int i=0; i<cities.size();i++){
     			 for(int j=1; j<route.size()-1;j++){
     				 
-    				 //Check city is not same as neighbours
-    				 
+    				 distance1=matrix.Distance(cities.getID(j-1), cities.getID(i));
+    				 distance2=matrix.Distance(cities.getID(i), cities.getID(j));
     				 
     				 //Check if insert is valid for time and fuel
     				 
-    				 route.isValidCityInsert(i,j);
+    				 route.isValidCityInsert(cities.getID(i),j,distance1,distance2);
     				 
     				 
     				 for(int k=9;k<199;k+=10){

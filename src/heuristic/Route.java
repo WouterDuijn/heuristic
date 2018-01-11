@@ -52,10 +52,23 @@ public class Route {
 		current_time = current_time + distance1/SPEED + distance2/SPEED;
 		
 		//replace refuel by vector of refuel moments and adjust tank
+		//check where to refuel, either in newly added city or in previous city
 		if(ref){
-			refuel.add(index,1);
-			current_time+=1;
-			tank.add(index,MAX_FUEL_DISTANCE);			
+			if(tank.get(index-1)-distance1<=0 && tank.get(index)-distance2<=0){
+				refuel.add(index-1,1);
+				tank.add(index-1,MAX_FUEL_DISTANCE);
+				refuel.add(index,1);
+				tank.add(index,MAX_FUEL_DISTANCE);
+				current_time+=2;
+			} else if(tank.get(index-1)-distance1<=0){
+				refuel.add(index-1,1);
+				tank.add(index-1,MAX_FUEL_DISTANCE);
+				current_time+=1;
+			} else {
+				refuel.add(index,1);
+				tank.add(index,MAX_FUEL_DISTANCE);
+				current_time+=1;
+			}			
 		} else {
 			refuel.add(index,0);
 			tank.add(index,tank.get(index-1)-distance1);
@@ -90,12 +103,15 @@ public class Route {
 		profit+= profit_increment;
 	}
 	
+	
 	public int size(){
 		return cities.size();
 	}
 	
-	public boolean needsRefuel(int city_id, int index) {
-		// TODO we need the distances d1 and d2 to check if we can make the flight to that city
+	public boolean needsRefuel(int city_id, int index, double distance1, double distance2) {
+		if(tank.get(index-1)-distance1<=0 || tank.get(index)-distance2<=0){
+			return true;
+		}
 		return false;
 	}
 	
@@ -104,16 +120,13 @@ public class Route {
 	 * @param city_id
 	 * @param index
 	 * @return
+	 * result=0 => no valid insert
+	 * result=1 => valid insert without refuel
+	 * result=2 => valid insert only with refuel
 	 */
-	public int isValidCityInsert(int city_id, int index) {
+	
+	public int isValidCityInsert(int city_id, int index, double distance1, double distance2) {
 		int result=0;
-		// TODO fix way to return vector of refuels and return whether it is valid
-		//TODO adjust refuel moments if later refuel moments no longer required
-
-		//Deze TODO's kunnen niet in deze methode, omdat isValid niet betekent dat we de city ook daadwerkelijk toevoegen.
-		
-
-		//Deze 2 TODO's hierboven kunnen niet in deze methode, omdat isValid niet betekent dat we de city ook daadwerkelijk toevoegen.
 		
 		// index in Route is the index at which we check if the new city can be placed, but it is not yet added to the Route itself
 		// so a different city might be on this index at the moment
@@ -123,8 +136,17 @@ public class Route {
 			return result;
 		} else {
 			double time = current_time;
-			if(needsRefuel(city_id, index)) {
-				time+=1;
+			if(needsRefuel(city_id, index, distance1, distance2)) {
+				if(tank.get(index-1)-distance1<=0 && tank.get(index)-distance2<=0){
+					time+=2;
+				} else if(tank.get(index-1)-distance1<=0){
+					time+=1;
+				} else {
+					time+=1;
+				}					
+				result=2;
+			} else {
+				result=1;
 			}
 			// add un-, boarding time
 			time+=1;
@@ -132,34 +154,27 @@ public class Route {
 			// subtract flying time of current flight (that will be replaced by the newly created flights)
 			time-= distances.get(index-1)/SPEED;
 			
-			// TODO we need the distances d1 and d2 here to check if we can make the flight to that city
-			
 			// add flying times of the new flights created by adding the new city to the route
-			// time = time + d1/SPEED + d2/SPEED;
+			time = time + distance1/SPEED + distance2/SPEED;
 			
 			// if total time (auxiliary var. for current_time) does not exceed the day_length, it is a valid city insert.
 			if(time <= DAY_LENGTH) {
 				return result;
-			}			
+			} else {
+				result=0;
+			}
 		}
-		
-		// TODO adjust value of result inside if-statements
 
 		return result;
 	}
 
 	public boolean isValidNumberPax(int index, int passengers1, int passengers2) {
-		//TODO adjust for detours
 		if(passengers.get(index-1) + passengers1 <= MAX_PASSENGERS) {
 			if(passengers.get(index-1) + passengers2 <= MAX_PASSENGERS) {
 				return true;
 			}
 		}
-		return false;
-		
-		
-		
-		
+		return false;	
 	}
 	
 

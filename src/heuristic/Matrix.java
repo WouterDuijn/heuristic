@@ -2,11 +2,11 @@ package heuristic;
 
 public class Matrix {
 
-	private int[][] distances;
+	private double[][] distances;
 	private int[][] passengers;
 	
 	Matrix(int number_of_cities){
-		distances = new int[number_of_cities][number_of_cities];
+		distances = new double[number_of_cities][number_of_cities];
 		passengers = new int[number_of_cities][number_of_cities];
 	}
 	
@@ -20,7 +20,7 @@ public class Matrix {
 		passengers[id2][id1]=passenger;
 	}
 	
-	public int Distance(int id1, int id2) {
+	public double Distance(int id1, int id2) {
 		return distances[id1][id2];
 	}
 	
