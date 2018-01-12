@@ -129,8 +129,8 @@ public class Route {
 	 */
 	
 	// TODO result class met refuel vector, tank vector, current_time
-	public int isValidCityInsert(int city_id, int index, double distance1, double distance2) {
-		int result=0;
+	RefuelTankTime isValidCityInsert(int city_id, int index, double distance1, double distance2) {
+		RefuelTankTime result= new RefuelTankTime();
 		
 		double time = current_time;
 		

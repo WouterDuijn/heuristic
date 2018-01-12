@@ -15,5 +15,9 @@ public class RefuelTankTime {
 		this.current_time=time;
 		this.valid=valid;
 	}
+	
+	RefuelTankTime(){
+		valid=false;
+	}
 
 }
