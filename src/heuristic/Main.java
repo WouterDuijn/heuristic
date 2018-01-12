@@ -8,11 +8,11 @@ public class Main {
 	public static final String INPUT_PATH = "C:\\workspace\\heuristic\\inp\\";
 	
 	//tests
-	
+	PrintStream out;
 
      Main() {
     	 //Initialize variables
-                 
+    	 out = new PrintStream(System.out);       
      }
      
      void start() {
@@ -28,6 +28,8 @@ public class Main {
     	 while(cont){
     		 double distance1=0;
     		 double distance2=0;
+    		 
+    		 double profitIncrement=0;
     		 
     		 //Check for correct city, index and number of passengers
     		 for(int i=0; i<cities.size();i++){
@@ -49,19 +51,15 @@ public class Main {
     						 
     						 route.isValidNumberPax(j,k,l);
     						 
-    						 
-    						 
-    						 
-    						 
+    						 profitIncrement=k*distance1+l*distance2;
+    						 out.printf("Profit: %.2f",profitIncrement);
+    						 //Check for demand pax
+    						 	 
     					 }
-    					 
-    					 
+ 
     					 
     				 }
-    				 
-    				 
-    				 
-    				 
+ 
     			 }
     			 
     			 
