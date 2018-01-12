@@ -1,8 +1,11 @@
 package heuristic;
 
+import java.io.PrintStream;
 import java.util.Vector;
 
 public class Route {
+	
+	PrintStream out;
 	
 	private static final int DAY_LENGTH=20;
 	private static final double MAX_FUEL_DISTANCE=3199;
@@ -31,6 +34,8 @@ public class Route {
 		tank = new Vector<Double>();
 		tank.add(MAX_FUEL_DISTANCE);
 		tank.add(0.);
+		
+		out = new PrintStream(System.out);
 	}
 	
 	/**
@@ -101,9 +106,7 @@ public class Route {
 		int passenger_second_edge = passenger2 + passengers.elementAt(index);
 		
 		passengers.setElementAt(passenger_second_edge, index-1);
-		passengers.add(index-1, passenger_first_edge);
-		
-		//TODO keep track of the detours, otherwise isValidNumberPax and the profit cannot be determined 		
+		passengers.add(index-1, passenger_first_edge); 		
 		
 		profit+= profit_increment;
 	}
@@ -130,9 +133,13 @@ public class Route {
 	 * result=2 => valid insert only with refuel
 	 */
 	
-	public int isValidCityInsert(int city_id, int index, double distance1, double distance2) {
-		int result=0;
+	// TODO result class met refuel vector, tank vector, current_time
+	RefuelTankTime isValidCityInsert(int city_id, int index, double distance1, double distance2) {
+		RefuelTankTime result= new RefuelTankTime();
 		
+		double time = current_time;
+		
+
 		// index in Route is the index at which we check if the new city can be placed, but it is not yet added to the Route itself
 		// so a different city might be on this index at the moment
 		
@@ -140,19 +147,17 @@ public class Route {
 		if(cities.get(index-1).ID() == city_id || cities.get(index).ID() == city_id) {
 			return result;
 		} else {
-			double time = current_time;
 			if(needsRefuel(city_id, index, distance1, distance2)) {
 				if(tank.get(index-1)-distance1<=0 && tank.get(index)-distance2<=0){
 					time+=2;
-				} else if(tank.get(index-1)-distance1<=0){
-					time+=1;
 				} else {
 					time+=1;
 				}					
 				result=2;
 			} else {
 				result=1;
-			}
+			}			
+			
 			// add un-, boarding time
 			time+=1;
 			
@@ -168,9 +173,10 @@ public class Route {
 			} else {
 				result=0;
 			}
+			return result;
 		}
 
-		return result;
+	
 	}
 
 	public boolean isValidNumberPax(int index, int passengers1, int passengers2) {
