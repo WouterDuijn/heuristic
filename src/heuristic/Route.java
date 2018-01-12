@@ -18,12 +18,18 @@ public class Route {
 	Vector<Double> distances;
 	
 	Route(City city){
+		cities = new Vector<City>();
 		cities.add(city);
 		cities.add(city);
+		passengers = new Vector<Integer>();
 		passengers.add(0);
+		
+		distances = new Vector<Double>();
 		distances.add(0.);
+		refuel = new Vector<Integer>();
 		refuel.add(0);
 		refuel.add(0);
+		tank = new Vector<Double>();
 		tank.add(MAX_FUEL_DISTANCE);
 		tank.add(0.);
 	}
