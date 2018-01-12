@@ -26,4 +26,8 @@ public class Matrix {
 	public int Passengers(int id1, int id2) {
 		return passengers[id1][id2];
 	}
+	
+	public void DecreasePassengers(int id1, int id2, int amount) {
+		passengers[id1][id2]-=amount;
+	}
 }

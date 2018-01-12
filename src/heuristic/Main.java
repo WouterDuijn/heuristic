@@ -1,6 +1,8 @@
 package heuristic;
 
+import java.awt.Color;
 import java.io.PrintStream;
+import java.util.Vector;
 
 public class Main {
 
@@ -64,22 +66,33 @@ public class Main {
 
 
 	void start() {
-		//Parse input data
+		//Parse
 		System.out.println("Parsing the input data");
 		Parser parser = new Parser(INPUT_PATH);
 		Cities cities = parser.ParseCities();
 		Matrix matrix = parser.ParseMatrices(cities.size());
 
+		
+		
+		//Model
 		System.out.println("Running the model");
 		//Model(cities, matrix);
-
-
-
-
-
+		
+		Vector<Coordinate> c = new Vector<Coordinate>();
+		c.add(new Coordinate(205, 320));
+		c.add(new Coordinate(425, 535));
+		c.add(new Coordinate(160, 490));
+		c.add(new Coordinate(280, 315));
+		c.add(new Coordinate(445, 420));
+		c.add(new Coordinate(350, 395));
+		c.add(new Coordinate(275, 270));
+		c.add(new Coordinate(100, 290));
+		c.add(new Coordinate(205, 320));
 
 		//Visualize results
-
+		Map map = new Map();
+		map.ColourRoute(c, Color.BLACK);
+		map.Show();
 
 	}
 

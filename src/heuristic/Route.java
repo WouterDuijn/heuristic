@@ -147,7 +147,7 @@ public class Route {
 		if(cities.get(index-1).ID() == city_id || cities.get(index).ID() == city_id) {
 			return result;
 		} else {
-			if(needsRefuel(city_id, index, distance1, distance2)) {
+			/*if(needsRefuel(city_id, index, distance1, distance2)) {
 				if(tank.get(index-1)-distance1<=0 && tank.get(index)-distance2<=0){
 					time+=2;
 				} else {
@@ -156,7 +156,7 @@ public class Route {
 				result=2;
 			} else {
 				result=1;
-			}			
+			}	*/		
 			
 			// add un-, boarding time
 			time+=1;
@@ -168,11 +168,11 @@ public class Route {
 			time = time + distance1/SPEED + distance2/SPEED;
 			
 			// if total time (auxiliary var. for current_time) does not exceed the day_length, it is a valid city insert.
-			if(time <= DAY_LENGTH) {
+			/*if(time <= DAY_LENGTH) {
 				return result;
 			} else {
 				result=0;
-			}
+			}*/
 			return result;
 		}
 
@@ -188,5 +188,20 @@ public class Route {
 		return false;	
 	}
 	
-
+	public String toString(){ 
+		  return "Cities: " +cities+"\n" +"Refuel: "+ refuel +"\n"
+				  + "Passengers: " + passengers;  
+		 } 
+	
+	/**
+	 * 
+	 * @return Return vector of coordinates of all cities
+	 */
+	public Vector<Coordinate> GetCityCoodinates() {
+		Vector<Coordinate> results = new Vector<Coordinate>();
+		for(int i=0;i<cities.size();i++) {
+			results.add(new Coordinate(cities.get(i).X(), cities.get(i).Y()));
+		}
+		return results;
+	}
 }
