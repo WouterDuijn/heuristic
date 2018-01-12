@@ -15,5 +15,10 @@ public class RefuelTankTime {
 		this.current_time=time;
 		this.valid=valid;
 	}
+	
+	RefuelTankTime(){
+		refuel = new Vector<Integer>();
+		tank = new Vector<Double>();
+	}
 
 }

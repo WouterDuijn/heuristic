@@ -23,7 +23,6 @@ public class Route {
 		cities.add(city);
 		passengers = new Vector<Integer>();
 		passengers.add(0);
-		
 		distances = new Vector<Double>();
 		distances.add(0.);
 		refuel = new Vector<Integer>();
