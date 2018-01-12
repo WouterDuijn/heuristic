@@ -17,7 +17,6 @@ public class Matrix {
 	
 	public void InsertPassengers(int id1, int id2, int passenger) {
 		passengers[id1][id2]=passenger;
-		passengers[id2][id1]=passenger;
 	}
 	
 	public double Distance(int id1, int id2) {

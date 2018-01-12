@@ -15,12 +15,7 @@ public class Main {
                  
      }
      
-     void start() {
-    	 //Parse input data
-    	 Parser parser = new Parser(INPUT_PATH);
-    	 Cities cities = parser.ParseCities();
-    	 Matrix matrix = parser.ParseMatrices(cities.size());
-    	 
+     void Model(Cities cities, Matrix matrix) {
     	 //Run model
     	 Route route = new Route(cities.getCity(0));
     	 boolean cont = true;
@@ -39,38 +34,31 @@ public class Main {
     				 //Check if insert is valid for time and fuel
     				 
     				 route.isValidCityInsert(cities.getID(i),j,distance1,distance2);
-    				 
-    				 
+
     				 for(int k=9;k<199;k+=10){
     					 for(int l=9;l<199;l+=10){
-    						 
-    						 
     						 //Check if city can be added using  j, k & l
     						 
     						 route.isValidNumberPax(j,k,l);
-    						 
-    						 
-    						 
-    						 
-    						 
     					 }
-    					 
-    					 
-    					 
+
     				 }
-    				 
-    				 
-    				 
-    				 
     			 }
-    			 
-    			 
-    			 
     		 }
-    		 
-    		 
-    		 
     	 }
+     }
+     
+     void start() {
+    	 //Parse input data
+    	 System.out.println("Parsing the input data");
+    	 Parser parser = new Parser(INPUT_PATH);
+    	 Cities cities = parser.ParseCities();
+    	 Matrix matrix = parser.ParseMatrices(cities.size());
+
+    	 System.out.println("Running the model");
+    	 //Model(cities, matrix);
+    	 
+    	
     	 
     	 
     	 

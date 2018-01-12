@@ -19,6 +19,7 @@ public class Cities {
 	public int getID(int index){
 		return cities[index].ID();
 	}
+	
 	/**
 	 * Adds the city to the cities Object.
 	 * @param city to add
