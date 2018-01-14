@@ -30,5 +30,8 @@ public class City {
 		return name;
 	}
 	
-
+	City copy() {
+		City copy = new City(this.id, this.name, this.x, this.y);
+		return copy;
+	}
 }

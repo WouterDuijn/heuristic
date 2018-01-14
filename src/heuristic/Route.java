@@ -116,11 +116,22 @@ public class Route {
 		return cities.size();
 	}
 	
-	public boolean needsRefuel(int city_id, int index, double distance1, double distance2) {
+	public boolean needsRefuel(int index, double distance1, double distance2) {
 		if(tank.get(index-1)-distance1<=0 || tank.get(index)-distance2<=0){
 			return true;
 		}
 		return false;
+	}
+	
+	// heb deze methode (en in City copy()) aangemaakt omdat ik het makkelijker vond om te werken met een copy in isValidCityInsert
+	// anders kan ik moeilijker loopen over de indexen als ik bij tank, refuel wel de city 'toevoeg' en bij de route niet.
+	// clone() bij vector werkt alleen voor primitive types, dus moest zelf nog City copyen.
+	Vector<City> getCitiesCopy() {
+		Vector<City> copy = new Vector<City>(cities.size());
+		for(int i=0; i<=cities.size(); i++) {
+			copy.setElementAt(cities.get(i).copy(), i);
+		}
+		return copy;
 	}
 	
 	/**
@@ -128,50 +139,69 @@ public class Route {
 	 * @param city_id
 	 * @param index
 	 * @return
-	 * result=0 => no valid insert
-	 * result=1 => valid insert without refuel
-	 * result=2 => valid insert only with refuel
-	 */
-	
+	 */	
 	// TODO result class met refuel vector, tank vector, current_time
-	RefuelTankTime isValidCityInsert(int city_id, int index, double distance1, double distance2) {
-		RefuelTankTime result= new RefuelTankTime();
+	RefuelTankTime isValidCityInsert(City city, int index, double distance1, double distance2) {
+		RefuelTankTime result= new RefuelTankTime(refuel, tank, distances, current_time);
+		Vector<City> cities_copy = getCitiesCopy();
+		cities_copy.add(index, city);
 		
-		double time = current_time;
-		
-
-		// index in Route is the index at which we check if the new city can be placed, but it is not yet added to the Route itself
+		// index in cities vector is the index at which we check if the new city can be placed, but it is not yet added to the Route itself
 		// so a different city might be on this index at the moment
 		
 		// if city to be inserted is the same as a neighbour (city): not valid
-		if(cities.get(index-1).ID() == city_id || cities.get(index).ID() == city_id) {
+		
+		/* 	can be replaced by: (using copy)
+		if(cities_copy.get(index-1).ID() == city.ID() || cities_copy.get(index+1).ID() == city.ID()) {
+			return result;
+		  	...
+		 */
+		if(cities.get(index-1).ID() == city.ID() || cities.get(index).ID() == city.ID()) {
 			return result;
 		} else {
-			if(needsRefuel(city_id, index, distance1, distance2)) {
-				if(tank.get(index-1)-distance1<=0 && tank.get(index)-distance2<=0){
-					time+=2;
-				} else {
-					time+=1;
-				}					
-				result=2;
-			} else {
-				result=1;
-			}			
-			
 			// add un-, boarding time
-			time+=1;
+			result.current_time+=1;
 			
 			// subtract flying time of current flight (that will be replaced by the newly created flights)
-			time-= distances.get(index-1)/SPEED;
+			result.current_time-= distances.get(index-1)/SPEED;
 			
 			// add flying times of the new flights created by adding the new city to the route
-			time = time + distance1/SPEED + distance2/SPEED;
+			result.current_time = result.current_time + distance1/SPEED + distance2/SPEED;
+			
+			result.current_time-=distances.get(index-1)/SPEED;
+			
+			result.distances.setElementAt(distance2, index-1);
+			result.distances.add(index-1, distance1);
+			
+			if(needsRefuel(index, distance1, distance2)) {
+				if(tank.get(index-1)-distance1<=0 && tank.get(index)-distance2<=0){
+					result.refuel.add(index-1,1);
+					result.tank.add(index-1,MAX_FUEL_DISTANCE);
+					result.refuel.add(index,1);
+					result.tank.add(index,MAX_FUEL_DISTANCE);
+					result.current_time+=2;
+				} else if(tank.get(index-1)-distance1<=0){
+					refuel.add(index-1,1);
+					tank.add(index-1,MAX_FUEL_DISTANCE);
+					current_time+=1;
+				} else {
+					refuel.add(index,1);
+					tank.add(index,MAX_FUEL_DISTANCE);
+					current_time+=1;
+				}			
+			} else {
+				refuel.add(index,0);
+				tank.add(index,tank.get(index-1)-distance1);
+			}
+			
+			tank.setElementAt(tank.get(index)-distance2,index+1);
 			
 			// if total time (auxiliary var. for current_time) does not exceed the day_length, it is a valid city insert.
-			if(time <= DAY_LENGTH) {
+			if(result.current_time <= DAY_LENGTH) {
+				result.valid=true;
 				return result;
 			} else {
-				result=0;
+
 			}
 			return result;
 		}
