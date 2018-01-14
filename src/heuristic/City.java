@@ -7,6 +7,7 @@ public class City {
 	private int x;
 	private int y;
 	
+	// er is nu een coordinate class, misschien kunnen we die dan ook hier gebruiken, of beter niet?
 	City(int id, String name, int x, int y){
 		this.name=name;
 		this.id=id;
@@ -28,6 +29,10 @@ public class City {
 	
 	String Name() {
 		return name;
+	}
+	
+	public String toString(){ 
+		  return  name;
 	}
 	
 	City copy() {

@@ -10,6 +10,7 @@ public class RefuelTankTime {
 	double current_time=0;
 	boolean valid=false;
 	
+	// TODO clone vectors? Check!
 	RefuelTankTime(Vector<Integer> refuel, Vector<Double> tank, Vector<Double> distances, double time){
 		this.refuel=refuel;			//this.refuel = (Vector<Integer>) refuel.clone() ofzoiets?
 		this.tank=tank;			
