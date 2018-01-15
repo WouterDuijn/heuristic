@@ -22,8 +22,6 @@ public class Main {
 
 	void Model(Cities cities, Matrix matrix) {
 		//Run model
-		Route route = new Route(cities.getCity(0));
-		
 		boolean cont = true;
 		
 		/*double distance1=0;
@@ -46,30 +44,6 @@ public class Main {
 		double distance5=matrix.Distance(cities.getID(2), cities.getID(5));
 		double distance6=matrix.Distance(cities.getID(5), cities.getID(1));
 		route.isValidCityInsert(cities.getCity(5), 2, distance5,distance6);*/
-		
-		
-		
-		
-		int randomCity = rn.nextInt(cities.size());
-		int randomIndex = rn.nextInt(route.size())+1;
-		int randomPassenger1 = rn.nextInt(200);
-		int randomPassenger2 = rn.nextInt(200);
-			
-		double distance1=matrix.Distance(cities.getID(randomIndex-1), cities.getID(randomCity));
-		double distance2=matrix.Distance(cities.getID(randomCity), cities.getID(randomIndex-1));
-		RefuelTankTime first= route.isValidCityInsert(cities.getCity(randomCity), randomIndex, distance1, distance2);
-		if(first.valid==true){
-			route.isValidNumberPax(randomIndex, randomPassenger1, randomPassenger2);
-			route.AddCity(cities.getCity(randomCity), randomIndex, first, randomPassenger1, randomPassenger2,randomPassenger1*distance1+randomPassenger2*distance2, distance1, distance2);
-		}
-			
-		for(int i = 0; i<10;i++){
-			int ranC = rn.nextInt(cities.size());
-			int randomP1 = rn.nextInt(200);
-			int randomP2 = rn.nextInt(200);
-				
-		}
-	
 		
 		/*while(cont){
 			double distance1=0;
@@ -111,9 +85,55 @@ public class Main {
 
 		}*/
 	}
-
-
-
+	
+	Vector<City> RandomModel(Cities cities, Matrix matrix){
+		double maxProfit=0;
+		Vector<City> optimalRoute = new Vector<City>();
+		double time=0;
+		//TODO: think of a good stop condition
+		for(int j = 0; j<100; j++){
+			Route route = new Route(cities.getCity(0));
+		
+			for(int i = 0; i<100; i++){
+				int randomCity = rn.nextInt(cities.size());
+				int randomIndex = rn.nextInt(route.size()-1)+1;
+				int randomPassenger1 = rn.nextInt(route.MAX_PASSENGERS-route.passengers.get(randomIndex-1)+1);
+				int randomPassenger2 = rn.nextInt(route.MAX_PASSENGERS-route.passengers.get(randomIndex-1)+1);
+					
+				double distance1=matrix.Distance(route.cities.get(randomIndex-1).ID(), cities.getID(randomCity));
+				double distance2=matrix.Distance(cities.getID(randomCity), route.cities.get(randomIndex-1).ID());
+				RefuelTankTime x= route.isValidCityInsert(cities.getCity(randomCity), randomIndex, distance1, distance2);
+				if(x.valid==true){
+					if(route.isValidNumberPax(randomIndex, randomPassenger1, randomPassenger2)){
+						route.AddCity(cities.getCity(randomCity), randomIndex, x, randomPassenger1, randomPassenger2, distance1, distance2);
+					}	
+				}
+			}
+			//out.println(route.cities.toString());
+			//out.printf("Current time: %.2f	", route.current_time);
+			//out.printf("Profit: €%.2f\n", route.profit);
+			if(route.profit > maxProfit){
+				maxProfit=route.profit;
+				optimalRoute=route.cities;
+				time=route.current_time;
+			}	
+		}
+		out.printf("Optimal route: %s\n", optimalRoute.toString());
+		out.printf("Maximum profit: €%.2f\n", maxProfit);
+		out.printf("Current time: %.2f", time);
+		return optimalRoute;
+	}
+	
+	void visualizeRandomModel(Vector<City> cities){
+		Vector<Coordinate> coor = new Vector<Coordinate>();
+		for(int i =0; i<cities.size();i++){
+			coor.add(new Coordinate(cities.get(i).X(), cities.get(i).Y()));
+		}
+		Map randomMap = new Map();
+		randomMap.ColourRoute(coor, Color.BLUE);
+		randomMap.Show();
+	}
+	
 	void start() {
 		//Parse
 		System.out.println("Parsing the input data");
@@ -121,10 +141,12 @@ public class Main {
 		Cities cities = parser.ParseCities();
 		Matrix matrix = parser.ParseMatrices(cities.size());
 
-		
+		//Random Model
+		System.out.println("Running the random model");
+		Vector<City> optimal = RandomModel(cities, matrix);
+		visualizeRandomModel(optimal);
 		
 		//Model
-		System.out.println("Running the model");
 		Model(cities, matrix);
 		
 		Vector<Coordinate> c = new Vector<Coordinate>();
