@@ -101,7 +101,8 @@ public class Main {
 				int randomPassenger2 = rn.nextInt(route.MAX_PASSENGERS-route.passengers.get(randomIndex-1)+1);
 					
 				double distance1=matrix.Distance(route.cities.get(randomIndex-1).ID(), cities.getID(randomCity));
-				double distance2=matrix.Distance(cities.getID(randomCity), route.cities.get(randomIndex-1).ID());
+				double distance2=matrix.Distance(cities.getID(randomCity), route.cities.get(randomIndex).ID());
+
 				RefuelTankTime x= route.isValidCityInsert(cities.getCity(randomCity), randomIndex, distance1, distance2);
 				if(x.valid==true){
 					if(route.isValidNumberPax(randomIndex, randomPassenger1, randomPassenger2)){
@@ -164,7 +165,6 @@ public class Main {
 		Map map = new Map();
 		map.ColourRoute(c, Color.BLACK);
 		//map.Show();
-
 	}
 
 	public static void main(String[] argv) {

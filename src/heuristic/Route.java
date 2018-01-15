@@ -14,10 +14,10 @@ public class Route {
 
 	Vector<City> cities;
 	private Vector<Integer> refuel; //
-	private Vector<Double> tank; //number of kilometers the plane can still travel without refuel at arrival
+	private Vector<Double> tank; //number of kilometers the plane can still travel after arrival at a city
 	double current_time;
 	double profit;
-	Vector<Integer> passengers; // initialize/declare vectors
+	Vector<Integer> passengers; 
 	Vector<Double> distances;
 
 	Route(City city){
@@ -56,7 +56,7 @@ public class Route {
 		distances = city_results.distances;
 
 		int passenger_first_edge= passenger1 + passengers.elementAt(index-1);
-		int passenger_second_edge = passenger2 + passengers.elementAt(index-1);//changed index to index-1
+		int passenger_second_edge = passenger2 + passengers.elementAt(index-1);
 		
 		passengers.setElementAt(passenger_second_edge, index-1);
 		passengers.add(index-1, passenger_first_edge); 		
@@ -107,15 +107,19 @@ public class Route {
 			// add un-, boarding time
 			result.current_time+=1;
 			//out.println(result.current_time);
+			
 			// subtract flying time of current flight (that will be replaced by the newly created flights)
 			result.current_time-= distances.get(index-1)/SPEED;
 			//out.println(result.current_time);
+			
 			// add flying times of the new flights
 			result.current_time = result.current_time + distance1/SPEED + distance2/SPEED;
 			//out.printf("%.2f\n",result.current_time);
+			
 			result.distances.setElementAt(distance2, index-1);
 			result.distances.add(index-1, distance1);
 			//out.println(result.distances);
+			
 			if(needsRefuel(index, distance1, distance2)) {
 				// if refuel is required before distance1 can be traveled
 				if(result.tank.get(index-1)-distance1<=0) {
@@ -148,6 +152,7 @@ public class Route {
 			// set new tank value at index+1 after flying distance2
 			result.tank.setElementAt(result.tank.get(index)-distance2, index+1); 
 			//out.println(result.tank);
+			
 			// Recompute required refuel moments and remaining tank values of remaining route
 			for(int i=index+2; i<cities_copy.size(); i++) {
 				if(result.tank.get(i-1) - result.distances.get(i-1) <= 0) {
@@ -169,6 +174,7 @@ public class Route {
 			//out.println(result.tank);
 			//out.printf("%.2f\n",result.current_time);;
 			//out.println(result.refuel);
+			
 			// if total time does not exceed the day length, it is a valid city insert
 			if(result.current_time <= DAY_LENGTH) {
 				result.valid=true;
