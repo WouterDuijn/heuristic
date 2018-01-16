@@ -1,4 +1,4 @@
-package heuristic;
+package dom;
 
 public class Cities {
 	
@@ -12,7 +12,7 @@ public class Cities {
 		nr_cities=0;
 	}
 	
-	City getCity(int index){
+	public City getCity(int index){
 		return cities[index];
 	}
 	

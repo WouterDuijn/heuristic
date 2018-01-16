@@ -1,4 +1,4 @@
-package heuristic;
+package dom;
 
 import java.util.Vector;
 
@@ -8,7 +8,19 @@ public class RefuelTankTime {
 	Vector<Double> tank;
 	Vector<Double> distances; // voor het gemak in Route heb ik distances hier toegevoegd, maar nog niet in de class name. makkelijker met indexen
 	double current_time=0;
-	boolean valid=false;
+	public boolean valid=false;
+	
+	/**
+	 * Copy Constructor
+	 * @param copy to be copied from
+	 */
+	RefuelTankTime(RefuelTankTime copy){
+		this.refuel=copy.refuel;
+		this.tank=copy.tank;
+		this.distances=copy.distances;
+		this.current_time=copy.current_time;
+		this.valid=copy.valid;
+	}
 	
 	// TODO clone vectors? Check!
 	RefuelTankTime(Vector<Integer> refuel, Vector<Double> tank, Vector<Double> distances, double time){

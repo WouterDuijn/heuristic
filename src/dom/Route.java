@@ -1,4 +1,4 @@
-package heuristic;
+package dom;
 
 import java.io.PrintStream;
 import java.util.Vector;
@@ -10,38 +10,52 @@ public class Route {
 	private static final int DAY_LENGTH=20;
 	private static final double MAX_FUEL_DISTANCE=3199;
 	private static final int SPEED=800;
-	static final int MAX_PASSENGERS = 199;
+	private static final int MAX_PASSENGERS = 199;
 
-	Vector<City> cities;
+	
+	private Vector<City> cities;
 	private Vector<Integer> refuel; //
 	private Vector<Double> tank; //number of kilometers the plane can still travel after arrival at a city
-	double current_time;
-	double profit;
-	Vector<Integer> passengers; 
+	public double current_time;
+	public double profit;
+	private Vector<Integer> passengers; 
 	Vector<Double> distances;
+	
+	/**
+	 * Default Constructor. Set current time and profit to zero
+	 */
+	public Route(){
+		setCities(new Vector<City>());
+		setPassengers(new Vector<Integer>());
+		distances = new Vector<Double>();
+		refuel = new Vector<Integer>();
+		tank = new Vector<Double>();
+		current_time=0;
+		profit=0;
+	}
 	
 	
 	/**
 	 * Copy constructor of route
 	 * @param route = route to be copied from
 	 */
-	Route(Route route){
-		this.cities=route.cities;
+	public Route(Route route){
+		this.setCities(route.getCities());
 		this.refuel=route.refuel;
 		this.tank=route.tank;
 		this.current_time=route.current_time;
 		this.profit = route.profit;
-		this.passengers=route.passengers;
+		this.setPassengers(route.getPassengers());
 		this.distances=route.distances;
 	}
 	
 	
-	Route(City city){
-		cities = new Vector<City>();
-		cities.add(city);
-		cities.add(city);
-		passengers = new Vector<Integer>();
-		passengers.add(0);
+	public Route(City city){
+		setCities(new Vector<City>());
+		getCities().add(city);
+		getCities().add(city);
+		setPassengers(new Vector<Integer>());
+		getPassengers().add(0);
 		distances = new Vector<Double>();
 		distances.add(0.);
 		refuel = new Vector<Integer>();
@@ -67,24 +81,24 @@ public class Route {
 	 */
 	public void AddCity(City city, int index, RefuelTankTime city_results, int passenger1,
 			int passenger2, double distance1, double distance2){
-		cities.add(index, city);
+		getCities().add(index, city);
 		current_time = city_results.current_time;
 		refuel = city_results.refuel; 
 		tank = city_results.tank;
 		distances = city_results.distances;
 
-		int passenger_first_edge= passenger1 + passengers.elementAt(index-1);
-		int passenger_second_edge = passenger2 + passengers.elementAt(index-1);
+		int passenger_first_edge= passenger1 + getPassengers().elementAt(index-1);
+		int passenger_second_edge = passenger2 + getPassengers().elementAt(index-1);
 		
-		passengers.setElementAt(passenger_second_edge, index-1);
-		passengers.add(index-1, passenger_first_edge); 		
+		getPassengers().setElementAt(passenger_second_edge, index-1);
+		getPassengers().add(index-1, passenger_first_edge); 		
 		//out.println(passengers);
 		
 		profit+= passenger1*distance1+passenger2*distance2;
 	}
 
 	public int size(){
-		return cities.size();
+		return getCities().size();
 	}
 
 	public boolean needsRefuel(int index, double distance1, double distance2) {
@@ -95,16 +109,20 @@ public class Route {
 	}
 
 	Vector<City> getCitiesCopy() {
-		Vector<City> copy = new Vector<City>(cities.size());
-		for(int i=0; i<cities.size(); i++) {
-			copy.add(i,cities.get(i).copy());
+		Vector<City> copy = new Vector<City>(getCities().size());
+		for(int i=0; i<getCities().size(); i++) {
+			copy.add(i,getCities().get(i).copy());
 		}
 		return copy;
 	}
 
-	RefuelTankTime isValidCityInsert(City city, int index, double distance1, double distance2) {
-		RefuelTankTime result = new RefuelTankTime(refuel, tank, distances, current_time); // boolean result.valid is false by default
-		Vector<City> cities_copy = getCitiesCopy();
+	public RefuelTankTime isValidCityInsert(City city, int index, double distance1, double distance2) {
+		
+		// boolean result.valid is false by default
+		RefuelTankTime result = new RefuelTankTime(refuel, tank, distances, current_time); 
+		
+		//Makes deepcopy of cities vector
+		Vector<City> cities_copy = new Vector<City>(getCities());
 		
 		// if current_time above or equal to day length - 1 hour, no new flights can be added
 		// since only boarding and unboarding will already take an extra hour on top of flight
@@ -204,12 +222,37 @@ public class Route {
 	}
 
 	public boolean isValidNumberPax(int index, int passengers1, int passengers2) {
-		if(passengers.get(index-1) + passengers1 <= MAX_PASSENGERS) {
-			if(passengers.get(index-1) + passengers2 <= MAX_PASSENGERS) {
+		if(getPassengers().get(index-1) + passengers1 <= getMaxPassengers()) {
+			if(getPassengers().get(index-1) + passengers2 <= getMaxPassengers()) {
 				return true;
 			}
 		}
 		return false;	
+	}
+
+
+	public static int getMaxPassengers() {
+		return MAX_PASSENGERS;
+	}
+
+
+	public Vector<Integer> getPassengers() {
+		return passengers;
+	}
+
+
+	public void setPassengers(Vector<Integer> passengers) {
+		this.passengers = passengers;
+	}
+
+
+	public Vector<City> getCities() {
+		return cities;
+	}
+
+
+	public void setCities(Vector<City> cities) {
+		this.cities = cities;
 	}
 
 

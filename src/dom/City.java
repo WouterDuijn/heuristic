@@ -1,4 +1,4 @@
-package heuristic;
+package dom;
 
 public class City {
 	
@@ -15,15 +15,15 @@ public class City {
 		this.y=y;
 	}
 	
-	int ID(){
+	public int ID(){
 		return id;
 	}
 	
-	int X() {
+	public int X() {
 		return x;
 	}
 	
-	int Y() {
+	public int Y() {
 		return y;
 	}
 	

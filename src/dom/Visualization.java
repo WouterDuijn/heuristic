@@ -1,4 +1,4 @@
-package heuristic;
+package dom;
 
 import java.awt.*;
 import java.awt.image.*;
@@ -9,12 +9,12 @@ import java.util.Vector;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-class Map {
+public class Visualization {
 	
 	 Dimension imgDim = new Dimension(200,200);
      BufferedImage mazeImage = null;
 
-    public Map(){
+    public Visualization(){
 		try {
 			mazeImage = ImageIO.read(new File("C:\\workspace\\heuristic\\inp\\europe-scaled.png"));
 		} catch (IOException e) {

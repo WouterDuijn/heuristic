@@ -1,4 +1,4 @@
-package heuristic;
+package dom;
 
 import java.util.Scanner;
 import java.io.File;
@@ -14,7 +14,7 @@ public class Parser {
 	private String input_path;
 	PrintStream out;
 	
-	Parser(String input_path){
+	public Parser(String input_path){
 		this.input_path = input_path;
 		
 		out = new PrintStream(System.out);

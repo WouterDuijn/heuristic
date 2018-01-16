@@ -1,5 +1,12 @@
-package heuristic;
+package model;
 
+import dom.Cities;
+import dom.Visualization;
+import dom.Matrix;
+import dom.Route;
+import dom.Parser;
+import dom.Coordinate;
+import dom.RefuelTankTime;
 import java.awt.Color;
 import java.io.PrintStream;
 import java.util.Vector;
@@ -86,24 +93,33 @@ public class Main {
 		}*/
 	}
 	
-	Vector<City> RandomModel(Cities cities, Matrix matrix){
-		double maxProfit=0;
-		Vector<City> optimalRoute = new Vector<City>();
-		double time=0;
+	Route RandomModel(Cities cities, Matrix matrix){
+		
+		Route optimalRoute =new Route();
+		
 		//TODO: think of a good stop condition
 		for(int j = 0; j<100; j++){
 			Route route = new Route(cities.getCity(0));
 		
 			for(int i = 0; i<100; i++){
 				int randomCity = rn.nextInt(cities.size());
+				
+				//Is the index to insert the city in the route
 				int randomIndex = rn.nextInt(route.size()-1)+1;
-				int randomPassenger1 = rn.nextInt(route.MAX_PASSENGERS-route.passengers.get(randomIndex-1)+1);
-				int randomPassenger2 = rn.nextInt(route.MAX_PASSENGERS-route.passengers.get(randomIndex-1)+1);
-					
-				double distance1=matrix.Distance(route.cities.get(randomIndex-1).ID(), cities.getID(randomCity));
-				double distance2=matrix.Distance(cities.getID(randomCity), route.cities.get(randomIndex).ID());
+				
+				
+				//TODO: random passenger should bear in mind that limited nr of passengers given city pair
+				int randomPassenger1 = rn.nextInt(route.getMaxPassengers()-route.getPassengers().get(randomIndex-1)+1);
+				int randomPassenger2 = rn.nextInt(route.getMaxPassengers()-route.getPassengers().get(randomIndex-1)+1);
+				
+				//Are the two new distances of the two new edges created by inserting a new city
+				double distance1=matrix.Distance(route.getCities().get(randomIndex-1).ID(), cities.getID(randomCity));
+				double distance2=matrix.Distance(cities.getID(randomCity), route.getCities().get(randomIndex).ID());
 
+				//TODO: instead of returning the refueltank time. Just adjust the actual route object.
+				
 				RefuelTankTime x= route.isValidCityInsert(cities.getCity(randomCity), randomIndex, distance1, distance2);
+				
 				if(x.valid==true){
 					if(route.isValidNumberPax(randomIndex, randomPassenger1, randomPassenger2)){
 						route.AddCity(cities.getCity(randomCity), randomIndex, x, randomPassenger1, randomPassenger2, distance1, distance2);
@@ -113,24 +129,24 @@ public class Main {
 			//out.println(route.cities.toString());
 			//out.printf("Current time: %.2f	", route.current_time);
 			//out.printf("Profit: €%.2f\n", route.profit);
-			if(route.profit > maxProfit){
-				maxProfit=route.profit;
-				optimalRoute=route.cities;
-				time=route.current_time;
+			if(route.profit > optimalRoute.profit){
+				optimalRoute = new Route(route);
 			}	
 		}
-		out.printf("Optimal route: %s\n", optimalRoute.toString());
-		out.printf("Maximum profit: €%.2f\n", maxProfit);
-		out.printf("Current time: %.2f", time);
+		out.printf("Optimal route: %s\n", optimalRoute.getCities().toString());
+		out.printf("Maximum profit: €%.2f\n", optimalRoute.profit);
+		out.printf("Current time: %.2f", optimalRoute.current_time);
 		return optimalRoute;
 	}
 	
-	void visualizeRandomModel(Vector<City> cities){
+	void visualizeRandomModel(Route route){
 		Vector<Coordinate> coor = new Vector<Coordinate>();
-		for(int i =0; i<cities.size();i++){
-			coor.add(new Coordinate(cities.get(i).X(), cities.get(i).Y()));
+		System.out.println(route.getCities().size());
+		System.out.println(route.getCities().size());
+		for(int i =0; i<route.getCities().size();i++){
+			coor.add(new Coordinate(route.getCities().get(i).X(), route.getCities().get(i).Y()));
 		}
-		Map randomMap = new Map();
+		Visualization randomMap = new Visualization();
 		randomMap.ColourRoute(coor, Color.BLUE);
 		randomMap.Show();
 	}
@@ -144,11 +160,11 @@ public class Main {
 
 		//Random Model
 		System.out.println("Running the random model");
-		Vector<City> optimal = RandomModel(cities, matrix);
-		visualizeRandomModel(optimal);
+		Route route = RandomModel(cities, matrix);
+		visualizeRandomModel(route);
 		
 		//Model
-		Model(cities, matrix);
+		/*Model(cities, matrix);
 		
 		Vector<Coordinate> c = new Vector<Coordinate>();
 		c.add(new Coordinate(205, 320));
@@ -163,7 +179,7 @@ public class Main {
 
 		//Visualize results
 		Map map = new Map();
-		map.ColourRoute(c, Color.BLACK);
+		map.ColourRoute(c, Color.BLACK);*/
 		//map.Show();
 	}
 
