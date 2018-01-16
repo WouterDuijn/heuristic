@@ -19,7 +19,23 @@ public class Route {
 	double profit;
 	Vector<Integer> passengers; 
 	Vector<Double> distances;
-
+	
+	
+	/**
+	 * Copy constructor of route
+	 * @param route = route to be copied from
+	 */
+	Route(Route route){
+		this.cities=route.cities;
+		this.refuel=route.refuel;
+		this.tank=route.tank;
+		this.current_time=route.current_time;
+		this.profit = route.profit;
+		this.passengers=route.passengers;
+		this.distances=route.distances;
+	}
+	
+	
 	Route(City city){
 		cities = new Vector<City>();
 		cities.add(city);
@@ -38,6 +54,8 @@ public class Route {
 		profit=0;
 		out = new PrintStream(System.out);
 	}
+	
+	
 
 	/**
 	 * 
