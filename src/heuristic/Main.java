@@ -90,15 +90,23 @@ public class Main {
 		double maxProfit=0;
 		Vector<City> optimalRoute = new Vector<City>();
 		double time=0;
+		Vector<Integer> passenger = new Vector<Integer>(); 
 		//TODO: think of a good stop condition
+		//TODO: include passenger input matrix
 		for(int j = 0; j<100; j++){
 			Route route = new Route(cities.getCity(0));
 		
 			for(int i = 0; i<100; i++){
 				int randomCity = rn.nextInt(cities.size());
 				int randomIndex = rn.nextInt(route.size()-1)+1;
-				int randomPassenger1 = rn.nextInt(route.MAX_PASSENGERS-route.passengers.get(randomIndex-1)+1);
-				int randomPassenger2 = rn.nextInt(route.MAX_PASSENGERS-route.passengers.get(randomIndex-1)+1);
+				int maxPassenger1 = Math.max(route.MAX_PASSENGERS-route.passengers.get(randomIndex-1), matrix.Passengers(route.cities.get(randomIndex-1).ID(), cities.getID(randomCity)));
+				int maxPassenger2 = Math.max(route.MAX_PASSENGERS-route.passengers.get(randomIndex-1), matrix.Passengers(cities.getID(randomCity), route.cities.get(randomIndex).ID()));
+				
+				int randomPassenger1 = rn.nextInt(maxPassenger1+1);
+				int randomPassenger2 = rn.nextInt(maxPassenger2+1);
+					
+				//int randomPassenger1 = rn.nextInt(route.MAX_PASSENGERS-route.passengers.get(randomIndex-1)+1);
+				//int randomPassenger2 = rn.nextInt(route.MAX_PASSENGERS-route.passengers.get(randomIndex-1)+1);
 					
 				double distance1=matrix.Distance(route.cities.get(randomIndex-1).ID(), cities.getID(randomCity));
 				double distance2=matrix.Distance(cities.getID(randomCity), route.cities.get(randomIndex).ID());
@@ -117,11 +125,13 @@ public class Main {
 				maxProfit=route.profit;
 				optimalRoute=route.cities;
 				time=route.current_time;
+				passenger=route.passengers;
 			}	
 		}
 		out.printf("Optimal route: %s\n", optimalRoute.toString());
 		out.printf("Maximum profit: €%.2f\n", maxProfit);
-		out.printf("Current time: %.2f", time);
+		out.printf("Current time: %.2f\n", time);
+		out.printf("Passengers: %s", passenger);
 		return optimalRoute;
 	}
 	
