@@ -5,6 +5,15 @@ public class Matrix {
 	private double[][] distances;
 	private int[][] passengers;
 	
+	public Matrix(Matrix matrix) {
+		this.passengers = matrix.passengers.clone();
+		this.distances = matrix.distances.clone();
+	}
+	
+	public int[][] Passengers() {
+		return passengers;
+	}
+	
 	Matrix(int number_of_cities){
 		distances = new double[number_of_cities][number_of_cities];
 		passengers = new int[number_of_cities][number_of_cities];

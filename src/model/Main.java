@@ -98,41 +98,71 @@ public class Main {
 		Route optimalRoute =new Route();
 		
 		//TODO: think of a good stop condition
-		for(int j = 0; j<100; j++){
+		for(int j = 0; j<1000; j++){
+			
+			Matrix current_matrix = new Matrix(matrix);
+			
+			//TODO: deepcopy matrix
+			
 			Route route = new Route(cities.getCity(0));
 		
 			for(int i = 0; i<100; i++){
+				Route cur_route= new Route(route);
 				int randomCity = rn.nextInt(cities.size());
 				
-				//Is the index to insert the city in the route
-				int randomIndex = rn.nextInt(route.size()-1)+1;
-				
+				//Is the index to insert the city in the route.
+				int randomIndex =rn.nextInt(cur_route.size()-1)+1;
 				
 				//TODO: random passenger should bear in mind that limited nr of passengers given city pair
-				int randomPassenger1 = rn.nextInt(route.getMaxPassengers()-route.getPassengers().get(randomIndex-1)+1);
-				int randomPassenger2 = rn.nextInt(route.getMaxPassengers()-route.getPassengers().get(randomIndex-1)+1);
+				int before = cur_route.getCities().get(randomIndex-1).ID();
+				int beyond = cur_route.getCities().get(randomIndex).ID();
+				
+				
+				int available_passengers1= current_matrix.Passengers(before, randomCity);
+				int available_passengers2= current_matrix.Passengers(randomCity, beyond);
+				
+				
+				
+				int randomPassenger1 = rn.nextInt(Math.min(available_passengers1, (Route.getMaxPassengers()-
+						cur_route.getPassengers().get(randomIndex-1)))+1);
+				
+				int randomPassenger2 = rn.nextInt(Math.min(available_passengers2, (Route.getMaxPassengers()-
+						cur_route.getPassengers().get(randomIndex-1)))+1);
+			
 				
 				//Are the two new distances of the two new edges created by inserting a new city
-				double distance1=matrix.Distance(route.getCities().get(randomIndex-1).ID(), cities.getID(randomCity));
-				double distance2=matrix.Distance(cities.getID(randomCity), route.getCities().get(randomIndex).ID());
+				double distance1=current_matrix.Distance(cur_route.getCities().get(randomIndex-1).ID(), cities.getID(randomCity));
+				double distance2=current_matrix.Distance(cities.getID(randomCity), cur_route.getCities().get(randomIndex).ID());
+				
+				
+				double incr_profit = distance1*randomPassenger1 + distance2*randomPassenger2;
+				
+				cur_route.AddPassengers(randomIndex, randomPassenger1, randomPassenger2);
+				
+				boolean valid_city_insert =  cur_route.isValidCityInsert(cities.getCity(randomCity), randomIndex, 
+						distance1, distance2);
 
-				//TODO: instead of returning the refueltank time. Just adjust the actual route object.
-				
-				boolean valid_city_insert =  route.isValidCityInsert(cities.getCity(randomCity), randomIndex, distance1, distance2);
-				
-				if(valid_city_insert){
-					if(route.isValidNumberPax(randomIndex, randomPassenger1, randomPassenger2)){
-						route.AddCity(cities.getCity(randomCity), randomIndex, randomPassenger1, randomPassenger2, distance1, distance2);
-					}	
+				//If the city insertion in route is valid. Then update the route
+				if(valid_city_insert) {
+					cur_route.IncrementProfit(incr_profit);
+					route = new Route(cur_route);
+					
+					//Adjust passenger matrix
+					current_matrix.DecreasePassengers(before, randomCity, randomPassenger1);
+					current_matrix.DecreasePassengers(randomCity, beyond, randomPassenger2);
+
 				}
+				
+				route.CheckValidity();
 			}
-			//out.println(route.cities.toString());
-			//out.printf("Current time: %.2f	", route.current_time);
-			//out.printf("Profit: €%.2f\n", route.profit);
+			
+			//If the constructed route is better than current optimalRoute update the optimalRoute
 			if(route.profit > optimalRoute.profit){
 				optimalRoute = new Route(route);
 			}	
+			
 		}
+		
 		out.printf("Optimal route: %s\n", optimalRoute.toString());
 		out.printf("Maximum profit: €%.2f\n", optimalRoute.profit);
 		out.printf("Current time: %.2f", optimalRoute.current_time);

@@ -7,7 +7,7 @@ public class Route {
 
 	PrintStream out;
 
-	private static final int DAY_LENGTH=20;
+	public static final int DAY_LENGTH=20;
 	private static final double MAX_FUEL_DISTANCE=3199;
 	private static final int SPEED=800;
 	private static final int MAX_PASSENGERS = 199;
@@ -40,13 +40,13 @@ public class Route {
 	 * @param route = route to be copied from
 	 */
 	public Route(Route route){
-		this.setCities(route.getCities());
-		this.refuel=route.refuel;
-		this.tank=route.tank;
+		this.cities=new Vector<City>(route.cities);
+		this.refuel=new Vector<Integer>(route.refuel);
+		this.tank=new Vector<Double>(route.tank);
+		this.passengers=new Vector<Integer>(route.passengers);
+		this.distances=new Vector<Double>(route.distances);
 		this.current_time=route.current_time;
 		this.profit = route.profit;
-		this.setPassengers(route.getPassengers());
-		this.distances=route.distances;
 	}
 	
 	
@@ -93,7 +93,7 @@ public class Route {
 	}
 
 	public int size(){
-		return getCities().size();
+		return cities.size();
 	}
 
 	public boolean needsRefuel(int index, double distance1, double distance2) {
@@ -113,9 +113,6 @@ public class Route {
 
 	public boolean isValidCityInsert(City city, int index, double distance1, double distance2) {
 
-		//Makes deepcopy of cities vector
-		Vector<City> cities_copy = new Vector<City>(getCities());
-		
 		// if current_time above or equal to day length - 1 hour, no new flights can be added
 		// since only boarding and unboarding will already take an extra hour on top of flight
 		// particularly useful for the last to be added flight, instead of calculating everything first
@@ -127,9 +124,11 @@ public class Route {
 			return false; 
 		}
 
-		cities_copy.add(index, city); 
 		
-		if(cities_copy.get(index-1).ID() == city.ID() || cities_copy.get(index+1).ID() == city.ID()) {
+		cities.add(index, city); 
+		
+		//City is same as neighbouring city
+		if(cities.get(index-1).ID() == city.ID() || cities.get(index+1).ID() == city.ID()) {
 			return false;
 		} 
 		
@@ -149,9 +148,44 @@ public class Route {
 		distances.add(index-1, distance1);
 		//out.println(result.distances);
 		
-		if(needsRefuel(index, distance1, distance2)) {
+		
+		//Declare empty refuel vectors
+		Vector<Integer> refuel = new Vector<Integer>();
+		Vector<Double>tank = new Vector<Double>();
+
+		
+		for(int i=1;i<cities.size();i++) {
+			
+			Double current_tank = MAX_FUEL_DISTANCE;
+			
+			if(i>1) {
+				current_tank= tank.lastElement()-distances.get(i-2);
+			}
+			
+
+			Double dist_current_edge = distances.get(i-1);
+			Double tank_at_arrival = current_tank - dist_current_edge;
+			
+			if(tank_at_arrival<0) {
+				//Needs refuel at current city
+				refuel.add(1);
+				tank.add(MAX_FUEL_DISTANCE);
+				current_time+=1;
+			}else {
+				refuel.add(0);
+				tank.add(current_tank);
+			}
+		}
+		refuel.add(0);
+		tank.add(tank.lastElement()- distances.lastElement());
+		
+		this.refuel=refuel;
+		this.tank=tank;
+
+		/*if(needsRefuel(index, distance1, distance2)) {
 			// if refuel is required before distance1 can be traveled
 			if(tank.get(index-1)-distance1<=0) {
+				
 				if(refuel.elementAt(index-1)==0) {
 					refuel.setElementAt(1, index-1);
 					tank.setElementAt(MAX_FUEL_DISTANCE, index-1);
@@ -182,8 +216,10 @@ public class Route {
 		tank.setElementAt(tank.get(index)-distance2, index+1); 
 		//out.println(result.tank);
 		
+		
+		
 		// Recompute required refuel moments and remaining tank values of remaining route
-		for(int i=index+2; i<cities_copy.size(); i++) {
+		for(int i=index+2; i<cities.size(); i++) {
 			if(tank.get(i-1) - distances.get(i-1) <= 0) {
 				if(refuel.get(i-1) == 0){
 					refuel.setElementAt(1, i-1);
@@ -199,7 +235,7 @@ public class Route {
 			}
 			// Recompute tank value according to new previous tank values
 			tank.setElementAt(tank.get(i-1)-distances.get(i-1), i);
-		}	
+		}	*/
 		//out.println(result.tank);
 		//out.printf("%.2f\n",result.current_time);;
 		//out.println(result.refuel);
@@ -213,13 +249,10 @@ public class Route {
 
 	}
 
-	public boolean isValidNumberPax(int index, int passengers1, int passengers2) {
-		if(getPassengers().get(index-1) + passengers1 <= getMaxPassengers()) {
-			if(getPassengers().get(index-1) + passengers2 <= getMaxPassengers()) {
-				return true;
-			}
-		}
-		return false;	
+	public void AddPassengers(int index, int passengers1, int passengers2) {
+		int passengers_on_edge = passengers.get(index-1);
+		passengers.set(index-1, passengers_on_edge+passengers2);
+		passengers.add(index-1, passengers_on_edge+passengers1);
 	}
 
 
@@ -250,6 +283,37 @@ public class Route {
 	public String toString() { 
 		return ("Cities\t" + this.cities.toString()+ "\n" + 
 				"Refuel\t" + this.refuel.toString() + "\n" +
-				"Passengers\t" + this.passengers.toString());
+				"Passengers\t" + this.passengers.toString() +"\n" +
+				"Tank\t" + this.tank.toString() +"\n" +
+				"Distances\t" + this.distances.toString());
+	}
+
+
+	public void IncrementProfit(double incr_profit) {
+		profit+=incr_profit;
+		
+	}
+
+
+	public Vector<Double> getDistances() {
+		return this.distances;
+	}
+
+
+	public void CheckValidity() {
+		if(this.passengers.size()!=this.distances.size()) {
+			throw new RuntimeException("Route invalid");
+		}
+		if(this.distances.size()!=this.passengers.size()) {
+			throw new RuntimeException("Route invalid");
+		}
+		
+		if(this.cities.size()!=this.refuel.size()) {
+			throw new RuntimeException("Route invalid");
+		}
+		if(this.cities.size()!=this.tank.size()) {
+			throw new RuntimeException("Route invalid");
+		}
+		
 	}
 }
