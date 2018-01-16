@@ -118,11 +118,11 @@ public class Main {
 
 				//TODO: instead of returning the refueltank time. Just adjust the actual route object.
 				
-				RefuelTankTime x= route.isValidCityInsert(cities.getCity(randomCity), randomIndex, distance1, distance2);
+				boolean valid_city_insert =  route.isValidCityInsert(cities.getCity(randomCity), randomIndex, distance1, distance2);
 				
-				if(x.valid==true){
+				if(valid_city_insert){
 					if(route.isValidNumberPax(randomIndex, randomPassenger1, randomPassenger2)){
-						route.AddCity(cities.getCity(randomCity), randomIndex, x, randomPassenger1, randomPassenger2, distance1, distance2);
+						route.AddCity(cities.getCity(randomCity), randomIndex, randomPassenger1, randomPassenger2, distance1, distance2);
 					}	
 				}
 			}
@@ -133,7 +133,7 @@ public class Main {
 				optimalRoute = new Route(route);
 			}	
 		}
-		out.printf("Optimal route: %s\n", optimalRoute.getCities().toString());
+		out.printf("Optimal route: %s\n", optimalRoute.toString());
 		out.printf("Maximum profit: €%.2f\n", optimalRoute.profit);
 		out.printf("Current time: %.2f", optimalRoute.current_time);
 		return optimalRoute;
