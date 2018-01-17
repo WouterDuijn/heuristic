@@ -29,6 +29,10 @@ public class Bookings {
 		return bookings.get(random_booking_key);
 	}
 	
+	public Booking GetBooking(int city1, int city2) {
+		return bookings.get(new Booking(city1, city2,0).Hash());
+	}
+	
 	public void RemoveBooking(int city1, int city2) {
 		bookings.remove(new Booking(city1, city2, 0).Hash());
 	}

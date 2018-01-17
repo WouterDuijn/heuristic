@@ -14,7 +14,7 @@ public class Route {
 	private static final int MAX_PASSENGERS = 199;
 
 	
-	Vector<City> cities;
+	public Vector<City> cities;
 	private Vector<Double> tank; //number of kilometers the plane can still travel after arrival at a city
 	public double current_time;
 	public double profit;
@@ -238,33 +238,142 @@ public class Route {
 		}
 	}
 	
-	public void Mutate(Random rn, Matrix matrix) {
+	/**
+	 * 
+	 * @param rn is random variable
+	 * @param matrix is the matrix where the passenger values get adjusted.
+	 * @return whether the mutation is succesfull. Note: the matrix is also adjusted and should be beared in mind
+	 */
+	public boolean Mutate(Random rn, Matrix matrix) {
+		int choice = rn.nextInt(4);
 		
-		SwapDetour(rn, matrix);
+		if(choice==0) {
+			return SwapDetour(rn, matrix);
+		}else if(choice==1) {
+			return CitySwap(rn, matrix);
+		}else if(choice==2) {
+			//TODO:Passenger adjustment
+		}else if(choice==3) {
+			//TODO:City add/remove
+		}
 		
-		
+		return false;
 	}
 	
+	/**
+	 * 
+	 * @param rn
+	 * @param matrix is the matrix that gets adjusted
+	 * @returns whether the cityswap is valid
+	 */
+	private boolean CitySwap(Random rn, Matrix matrix) {
+		
+		//Pick random city pair
+		int city_index = rn.nextInt(cities.size()-2)+1;
+		City before =cities.get(city_index-1);
+		City c1 = cities.get(city_index);
+		City c2 = cities.get(city_index+1);
+		City beyond = cities.get(city_index+2);
+		
+		//So City c1 and c2 are being swapped
+		
+		//Remove current booking and passengers
+		Booking booking = bookings.GetBooking(c1.ID(), c2.ID());
+		bookings.RemoveBooking(c1.ID(), c2.ID());
+		profit-= matrix.Distance(c1.ID(),c2.ID())*booking.Pax();
+		matrix.UpdatePassengers(c1.ID(), c2.ID(), booking.Pax());
+		
+		//Set new passengers on flight
+		int free_capacity = MAX_PASSENGERS - passengers.get(city_index) - booking.Pax();
+		int available_passengers = matrix.Passengers(c1.ID(), c2.ID());
+		int new_direct_passengers = rn.nextInt(Math.min(available_passengers, free_capacity))+1;
+		matrix.UpdatePassengers(c1.ID(), c2.ID(), -new_direct_passengers);
+		passengers.set(city_index, passengers.get(city_index) - booking.Pax() + new_direct_passengers);
+		
+		//Set/Updates the booking for the new passengers
+		bookings.AddBooking(new Booking(c1.ID(),c2.ID(), new_direct_passengers));
+		profit+= matrix.Distance(c2.ID(),c1.ID())*new_direct_passengers;
+		
+		//Swap cities in list
+		cities.set(city_index, c2);
+		cities.set(city_index+1, c1);
+		
+		//Set new distances
+		distances.set(city_index, matrix.Distance(before.ID(), c1.ID()));
+		distances.set(city_index+1, matrix.Distance(c1.ID(), c2.ID()));
+		distances.set(city_index+2, matrix.Distance(c2.ID(), beyond.ID()));
+		
+		current_time =0;
+		
+		for(int i=0; i< distances.size();i++) {
+			//Add fly time
+			current_time += (distances.get(i)/SPEED);
+			
+			//Add boarding time
+			current_time +=1;
+
+		}
+		
+		//Last stop has no boarding time
+		current_time -=1;
+
+		//Update tank vector
+		tank = new Vector<Double>();
+		for(int i=1;i<cities.size();i++) {
+			
+			Double current_tank = MAX_FUEL_DISTANCE;
+			if(i>1) {
+				current_tank= tank.lastElement()-distances.get(i-2);
+			}
+			
+			Double dist_current_edge = distances.get(i-1);
+			Double tank_at_arrival = current_tank - dist_current_edge;
+			
+			if(tank_at_arrival<0) {
+				//Needs refuel at current city
+				tank.add(MAX_FUEL_DISTANCE);
+				current_time+=1;
+			}else {
+				tank.add(current_tank);
+			}
+		}
+		tank.add(tank.lastElement()- distances.lastElement());
+		
+		if(current_time > DAY_LENGTH) {
+			return false;
+		}
+		
+		//TODO: find a way to return the adjusted matrix
+		
+		return true;
+	}
+	
+	/**
+	 * 
+	 * @param rn
+	 * @param matrix is the matrix that gets adjusted
+	 * @return whether the swap is valid
+	 */
 	private boolean SwapDetour(Random rn, Matrix matrix) {
 		//Pick random booking
 		Booking random_booking = bookings.RandomBooking(rn);
 		
-		int from = random_booking.From();
-		int to = random_booking.To();
+		int cityid_from = random_booking.From();
+		int cityid_to = random_booking.To();
 		
 		int city_index1=0;
 		int city_index2=0;
 		
 		for(int i=0;i< cities.size()-1;i++) {	
-			if(from==cities.get(i).ID()) {
+			if(cityid_from==cities.get(i).ID()) {
 				//Booking starting point found
 				
 				for(int j=i+1;j<cities.size()-1;i++) {
 
-					if(to == cities.get(j).ID()) {
+					if(cityid_to == cities.get(j).ID()) {
 						//Found ending point
 						
-						if(i+i==j) {
+						if(i+1==j) {
 							//Booking has no detour
 							return false;
 						}else {
@@ -277,24 +386,31 @@ public class Route {
 		}
 		
 		//Remove detour booking and passengers
-		bookings.RemoveBooking(from, to);
-		profit-= matrix.Distance(from, to)*random_booking.Pax();
+		bookings.RemoveBooking(cityid_from, cityid_to);
+		profit-= matrix.Distance(cityid_from, cityid_to)*random_booking.Pax();
+		matrix.UpdatePassengers(cityid_from, cityid_to, random_booking.Pax());
 		
 		//Between these two cities make new bookings with no detours
 		for(int i=city_index1;i<city_index2;i++) {
 			
+			City c1=cities.get(i);
+			City c2=cities.get(i+1);
+			
 			//Check for capacity and available passengers on leg
 			int free_capacity = MAX_PASSENGERS - passengers.get(i) - random_booking.Pax();
-			int available_passengers = matrix.Passengers(i, i+1);
+			int available_passengers = matrix.Passengers(c1.ID(), c2.ID());
 			
 			//Update the new passengers
 			int new_direct_passengers = rn.nextInt(Math.min(available_passengers, free_capacity))+1;
 			passengers.set(i, passengers.get(i) - random_booking.Pax() + new_direct_passengers);
 			
 			//Set/Updates the booking for the new passengers
-			bookings.AddBooking(new Booking(i,i+1, new_direct_passengers));
-			profit+= matrix.Distance(cities.get(i).ID(), cities.get(i+1).ID())*new_direct_passengers;
+			bookings.AddBooking(new Booking(c1.ID(),c2.ID(), new_direct_passengers));
+			profit+= matrix.Distance(c1.ID(), c2.ID())*new_direct_passengers;
+			matrix.UpdatePassengers(c1.ID(), c2.ID(), -new_direct_passengers);
 		}
+		
+		//TODO: find a way to return matrix
 		return true;
 	}
 }

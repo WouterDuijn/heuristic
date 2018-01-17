@@ -36,7 +36,7 @@ public class Matrix {
 		return passengers[id1][id2];
 	}
 	
-	public void DecreasePassengers(int id1, int id2, int amount) {
-		passengers[id1][id2]-=amount;
+	public void UpdatePassengers(int id1, int id2, int amount) {
+		passengers[id1][id2]+=amount;
 	}
 }
