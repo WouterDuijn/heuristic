@@ -98,17 +98,24 @@ public class Main {
 		Route optimalRoute =new Route();
 		
 		//TODO: think of a good stop condition
-		for(int j = 0; j<100000; j++){
+		for(int j = 0; j<10000; j++){
 			
 			Matrix current_matrix = new Matrix(matrix);
 			
 			//TODO: deepcopy matrix
+			int randomStartCity = rn.nextInt(cities.size());
+			Route route = new Route(cities.getCity(randomStartCity));
 			
-			Route route = new Route(cities.getCity(0));
-		
 			for(int i = 0; i<100; i++){
 				Route cur_route= new Route(route);
+				
 				int randomCity = rn.nextInt(cities.size());
+				
+				if(route.cities.size()<3){
+					if(randomStartCity!=0){
+						randomCity = 0;
+					}
+				}
 				
 				//Is the index to insert the city in the route.
 				int randomIndex =rn.nextInt(cur_route.size()-1)+1;
@@ -117,11 +124,8 @@ public class Main {
 				int before = cur_route.getCities().get(randomIndex-1).ID();
 				int beyond = cur_route.getCities().get(randomIndex).ID();
 				
-				
 				int available_passengers1= current_matrix.Passengers(before, randomCity);
 				int available_passengers2= current_matrix.Passengers(randomCity, beyond);
-				
-				
 				
 				int randomPassenger1 = rn.nextInt(Math.min(available_passengers1, (Route.getMaxPassengers()-
 						cur_route.getPassengers().get(randomIndex-1)))+1);
