@@ -106,7 +106,7 @@ public class Main {
 			int randomStartCity = rn.nextInt(cities.size());
 			Route route = new Route(cities.getCity(randomStartCity));
 			
-			for(int i = 0; i<100; i++){
+			for(int i = 0; i<200; i++){
 				Route cur_route= new Route(route);
 				
 				int randomCity = rn.nextInt(cities.size());
