@@ -98,7 +98,7 @@ public class Main {
 		Route optimalRoute =new Route();
 		
 		//TODO: think of a good stop condition
-		for(int j = 0; j<1000; j++){
+		for(int j = 0; j<100000; j++){
 			
 			Matrix current_matrix = new Matrix(matrix);
 			
@@ -168,8 +168,8 @@ public class Main {
 	
 	void visualizeRandomModel(Route route){
 		Vector<Coordinate> coor = new Vector<Coordinate>();
-		System.out.println(route.getCities().size());
-		System.out.println(route.getCities().size());
+		//System.out.println(route.getCities().size());
+		//System.out.println(route.getCities().size());
 		for(int i =0; i<route.getCities().size();i++){
 			coor.add(new Coordinate(route.getCities().get(i).X(), route.getCities().get(i).Y()));
 		}
