@@ -20,6 +20,7 @@ public class Route {
 	public double profit;
 	private Vector<Integer> passengers; 
 	Vector<Double> distances;
+	private Bookings bookings;
 	
 	/**
 	 * Default Constructor. Set current time and profit to zero
@@ -28,6 +29,7 @@ public class Route {
 		setCities(new Vector<City>());
 		setPassengers(new Vector<Integer>());
 		distances = new Vector<Double>();
+		bookings = new Bookings();
 		refuel = new Vector<Integer>();
 		tank = new Vector<Double>();
 		current_time=0;
@@ -45,6 +47,7 @@ public class Route {
 		this.tank=new Vector<Double>(route.tank);
 		this.passengers=new Vector<Integer>(route.passengers);
 		this.distances=new Vector<Double>(route.distances);
+		this.bookings = new Bookings(route.bookings);
 		this.current_time=route.current_time;
 		this.profit = route.profit;
 	}
@@ -58,6 +61,7 @@ public class Route {
 		getPassengers().add(0);
 		distances = new Vector<Double>();
 		distances.add(0.);
+		bookings = new Bookings();
 		refuel = new Vector<Integer>();
 		refuel.add(0);
 		refuel.add(0);
@@ -290,8 +294,11 @@ public class Route {
 
 
 	public void IncrementProfit(double incr_profit) {
-		profit+=incr_profit;
-		
+		profit+=incr_profit;	
+	}
+	
+	public void AddBooking(int cityid_from, int cityid_to, int nr_passengers) {
+		bookings.AddBooking(new Booking(cityid_from, cityid_to, nr_passengers));
 	}
 
 

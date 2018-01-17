@@ -117,11 +117,8 @@ public class Main {
 				int before = cur_route.getCities().get(randomIndex-1).ID();
 				int beyond = cur_route.getCities().get(randomIndex).ID();
 				
-				
 				int available_passengers1= current_matrix.Passengers(before, randomCity);
 				int available_passengers2= current_matrix.Passengers(randomCity, beyond);
-				
-				
 				
 				int randomPassenger1 = rn.nextInt(Math.min(available_passengers1, (Route.getMaxPassengers()-
 						cur_route.getPassengers().get(randomIndex-1)))+1);
