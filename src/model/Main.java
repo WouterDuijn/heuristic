@@ -98,12 +98,9 @@ public class Main {
 		Route optimalRoute =new Route();
 		
 		//TODO: think of a good stop condition
-		for(int j = 0; j<100000; j++){
+		for(int j = 0; j<10000; j++){
 			
 			Matrix current_matrix = new Matrix(matrix);
-			
-			//TODO: deepcopy matrix
-			
 			Route route = new Route(cities.getCity(0));
 		
 			for(int i = 0; i<100; i++){
@@ -125,6 +122,7 @@ public class Main {
 				
 				int randomPassenger2 = rn.nextInt(Math.min(available_passengers2, (Route.getMaxPassengers()-
 						cur_route.getPassengers().get(randomIndex-1)))+1);
+				
 			
 				
 				//Are the two new distances of the two new edges created by inserting a new city
@@ -136,12 +134,14 @@ public class Main {
 				
 				cur_route.AddPassengers(randomIndex, randomPassenger1, randomPassenger2);
 				
-				boolean valid_city_insert =  cur_route.isValidCityInsert(cities.getCity(randomCity), randomIndex, 
+				boolean valid_city_insert =  cur_route.AddCity(cities.getCity(randomCity), randomIndex, 
 						distance1, distance2);
 
 				//If the city insertion in route is valid. Then update the route
 				if(valid_city_insert) {
 					cur_route.IncrementProfit(incr_profit);
+					cur_route.AddBooking(before, randomCity, randomPassenger1);
+					cur_route.AddBooking(randomCity, beyond, randomPassenger2);
 					route = new Route(cur_route);
 					
 					//Adjust passenger matrix
