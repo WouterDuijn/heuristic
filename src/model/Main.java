@@ -30,67 +30,6 @@ public class Main {
 	void Model(Cities cities, Matrix matrix) {
 		//Run model
 		boolean cont = true;
-		
-		/*double distance1=0;
-		double distance2=0;
-		
-		distance1=matrix.Distance(cities.getID(0), cities.getID(1));
-		distance2=matrix.Distance(cities.getID(1), cities.getID(0));
-
-		RefuelTankTime example = route.isValidCityInsert(cities.getCity(1), 1, distance1, distance2);
-		route.isValidNumberPax(1, 100, 100);
-		route.AddCity(cities.getCity(1), 1, example, 100, 100, 100*distance1+100*distance2, distance1, distance2);
-		
-		double distance3=matrix.Distance(cities.getID(0), cities.getID(2));
-		double distance4=matrix.Distance(cities.getID(2), cities.getID(1));
-		
-		RefuelTankTime example2 = route.isValidCityInsert(cities.getCity(2), 1, distance3,distance4);
-		route.isValidNumberPax(1, 50, 50);
-		route.AddCity(cities.getCity(2),1,example2,50,50,50*distance3+50*distance4,distance3,distance4);
-		
-		double distance5=matrix.Distance(cities.getID(2), cities.getID(5));
-		double distance6=matrix.Distance(cities.getID(5), cities.getID(1));
-		route.isValidCityInsert(cities.getCity(5), 2, distance5,distance6);*/
-		
-		/*while(cont){
-			double distance1=0;
-			double distance2=0;
-
-			double profitIncrement=0;
-
-			//Check for correct city, index and number of passengers
-			for(int i=0; i<cities.size();i++){
-				for(int j=1; j<route.size()-1;j++){
-
-					distance1=matrix.Distance(cities.getID(j-1), cities.getID(i));
-					distance2=matrix.Distance(cities.getID(i), cities.getID(j));
-
-					//Check if insert is valid for time and fuel
-
-					route.isValidCityInsert(cities.getCity(i),j,distance1,distance2);
-
-					for(int k=9;k<199;k+=10){
-						for(int l=9;l<199;l+=10){
-							//Check if city can be added using  j, k & l
-
-							route.isValidNumberPax(j,k,l);
-
-
-							profitIncrement=k*distance1+l*distance2;
-							out.printf("Profit: %.2f",profitIncrement);
-							//Check for demand pax
-
-						}
-
-
-					}
-
-
-				}
-
-			}
-
-		}*/
 	}
 	
 	Route RandomModel(Cities cities, Matrix matrix){
@@ -101,11 +40,21 @@ public class Main {
 		for(int j = 0; j<10000; j++){
 			
 			Matrix current_matrix = new Matrix(matrix);
-			Route route = new Route(cities.getCity(0));
-		
-			for(int i = 0; i<100; i++){
+			
+			//TODO: deepcopy matrix
+			int randomStartCity = rn.nextInt(cities.size());
+			Route route = new Route(cities.getCity(randomStartCity));
+			
+			for(int i = 0; i<200; i++){
 				Route cur_route= new Route(route);
+				
 				int randomCity = rn.nextInt(cities.size());
+				
+				if(route.cities.size()<3){
+					if(randomStartCity!=0){
+						randomCity = 0;
+					}
+				}
 				
 				//Is the index to insert the city in the route.
 				int randomIndex =rn.nextInt(cur_route.size()-1)+1;
@@ -122,26 +71,22 @@ public class Main {
 				
 				int randomPassenger2 = rn.nextInt(Math.min(available_passengers2, (Route.getMaxPassengers()-
 						cur_route.getPassengers().get(randomIndex-1)))+1);
-				
 			
 				
 				//Are the two new distances of the two new edges created by inserting a new city
 				double distance1=current_matrix.Distance(cur_route.getCities().get(randomIndex-1).ID(), cities.getID(randomCity));
 				double distance2=current_matrix.Distance(cities.getID(randomCity), cur_route.getCities().get(randomIndex).ID());
 				
-				
 				double incr_profit = distance1*randomPassenger1 + distance2*randomPassenger2;
 				
 				cur_route.AddPassengers(randomIndex, randomPassenger1, randomPassenger2);
 				
-				boolean valid_city_insert =  cur_route.AddCity(cities.getCity(randomCity), randomIndex, 
+				boolean valid_city_insert =  cur_route.isValidCityInsert(cities.getCity(randomCity), randomIndex, 
 						distance1, distance2);
 
 				//If the city insertion in route is valid. Then update the route
 				if(valid_city_insert) {
 					cur_route.IncrementProfit(incr_profit);
-					cur_route.AddBooking(before, randomCity, randomPassenger1);
-					cur_route.AddBooking(randomCity, beyond, randomPassenger2);
 					route = new Route(cur_route);
 					
 					//Adjust passenger matrix
@@ -168,8 +113,6 @@ public class Main {
 	
 	void visualizeRandomModel(Route route){
 		Vector<Coordinate> coor = new Vector<Coordinate>();
-		//System.out.println(route.getCities().size());
-		//System.out.println(route.getCities().size());
 		for(int i =0; i<route.getCities().size();i++){
 			coor.add(new Coordinate(route.getCities().get(i).X(), route.getCities().get(i).Y()));
 		}
