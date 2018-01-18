@@ -81,20 +81,19 @@ public class Main {
 				
 				cur_route.AddPassengers(randomIndex, randomPassenger1, randomPassenger2);
 				
-				boolean valid_city_insert =  cur_route.isValidCityInsert(cities.getCity(randomCity), randomIndex, 
-						distance1, distance2);
+				boolean valid_city_insert =  cur_route.AddCity(cities.getCity(randomCity), randomIndex, distance1, distance2);
 
 				//If the city insertion in route is valid. Then update the route
 				if(valid_city_insert) {
 					cur_route.IncrementProfit(incr_profit);
+					cur_route.AddBooking(before, randomCity, randomPassenger1);
+					cur_route.AddBooking(randomCity, beyond, randomPassenger2);
 					route = new Route(cur_route);
 					
 					//Adjust passenger matrix
-					current_matrix.DecreasePassengers(before, randomCity, randomPassenger1);
-					current_matrix.DecreasePassengers(randomCity, beyond, randomPassenger2);
-
+					current_matrix.UpdatePassengers(before, randomCity, -randomPassenger1);
+					current_matrix.UpdatePassengers(randomCity, beyond, -randomPassenger2);
 				}
-				
 				route.CheckValidity();
 			}
 			
@@ -133,24 +132,6 @@ public class Main {
 		Route route = RandomModel(cities, matrix);
 		visualizeRandomModel(route);
 		
-		//Model
-		/*Model(cities, matrix);
-		
-		Vector<Coordinate> c = new Vector<Coordinate>();
-		c.add(new Coordinate(205, 320));
-		c.add(new Coordinate(425, 535));
-		c.add(new Coordinate(160, 490));
-		c.add(new Coordinate(280, 315));
-		c.add(new Coordinate(445, 420));
-		c.add(new Coordinate(350, 395));
-		c.add(new Coordinate(275, 270));
-		c.add(new Coordinate(100, 290));
-		c.add(new Coordinate(205, 320));
-
-		//Visualize results
-		Map map = new Map();
-		map.ColourRoute(c, Color.BLACK);*/
-		//map.Show();
 	}
 
 	public static void main(String[] argv) {
