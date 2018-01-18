@@ -14,7 +14,7 @@ public class Route {
 	private static final int MAX_PASSENGERS = 199;
 
 	
-	public Vector<City> cities;
+	private Vector<City> cities;
 	private Vector<Double> tank; //number of kilometers the plane can still travel after arrival at a city
 	public double current_time;
 	public double profit;
