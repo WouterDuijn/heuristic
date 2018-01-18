@@ -34,10 +34,10 @@ public class Main {
 	
 	Route RandomModel(Cities cities, Matrix matrix){
 		
-		Route optimalRoute =new Route();
+		Route optimalRoute =new Route(); 
 		
 		//TODO: think of a good stop condition
-		for(int j = 0; j<10000; j++){
+		for(int j = 0; j<100000; j++){
 			
 			Matrix current_matrix = new Matrix(matrix);
 			
@@ -100,7 +100,7 @@ public class Main {
 			
 			//If the constructed route is better than current optimalRoute update the optimalRoute
 			if(route.profit > optimalRoute.profit){
-				optimalRoute = new Route(route);
+				optimalRoute = new Route(route); 
 			}	
 			
 		}
