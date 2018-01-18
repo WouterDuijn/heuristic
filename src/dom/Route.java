@@ -14,7 +14,7 @@ public class Route {
 	private static final int MAX_PASSENGERS = 199;
 
 	
-	public Vector<City> cities;
+	private Vector<City> cities;
 	private Vector<Double> tank; //number of kilometers the plane can still travel after arrival at a city
 	public double current_time;
 	public double profit;
@@ -142,13 +142,13 @@ public class Route {
 		
 		for(int i=1;i<cities.size();i++) {
 			
-			Double current_tank = MAX_FUEL_DISTANCE;
+			double current_tank = MAX_FUEL_DISTANCE;
 			if(i>1) {
 				current_tank= tank.lastElement()-distances.get(i-2);
 			}
 			
-			Double dist_current_edge = distances.get(i-1);
-			Double tank_at_arrival = current_tank - dist_current_edge;
+			double dist_current_edge = distances.get(i-1);
+			double tank_at_arrival = current_tank - dist_current_edge;
 			
 			if(tank_at_arrival<0) {
 				//Needs refuel at current city
@@ -321,13 +321,13 @@ public class Route {
 		tank = new Vector<Double>();
 		for(int i=1;i<cities.size();i++) {
 			
-			Double current_tank = MAX_FUEL_DISTANCE;
+			double current_tank = MAX_FUEL_DISTANCE;
 			if(i>1) {
 				current_tank= tank.lastElement()-distances.get(i-2);
 			}
 			
-			Double dist_current_edge = distances.get(i-1);
-			Double tank_at_arrival = current_tank - dist_current_edge;
+			double dist_current_edge = distances.get(i-1);
+			double tank_at_arrival = current_tank - dist_current_edge;
 			
 			if(tank_at_arrival<0) {
 				//Needs refuel at current city
