@@ -63,20 +63,13 @@ public class Main {
 					int beyond = cur_route.getCities().get(randomIndex).ID();
 
 					int available_passengers1= matrix.Passengers(before, randomCity);
-					//out.println(available_passengers1);
 					int available_passengers2= matrix.Passengers(randomCity, beyond);
-					//out.println(available_passengers2);
-					//out.println();
-					if(available_passengers1<0 || available_passengers2<0) {
-						out.printf("%d, %d",available_passengers1,available_passengers2);
-					}
 					
 					int randomPassenger1 = rn.nextInt(Math.min(available_passengers1, (Route.getMaxPassengers()-
 							cur_route.getPassengers().get(randomIndex-1)))+1);
 
 					int randomPassenger2 = rn.nextInt(Math.min(available_passengers2, (Route.getMaxPassengers()-
 							cur_route.getPassengers().get(randomIndex-1)))+1);
-
 
 					//Are the two new distances of the two new edges created by inserting a new city
 					double distance1=inputMatrix.Distance(cur_route.getCities().get(randomIndex-1).ID(), cities.getID(randomCity));
@@ -108,13 +101,10 @@ public class Main {
 				if(route.profit > optimalRoute.profit){
 					optimalRoute = new Route(route);
 				}	
-			}
-			
-			schedule.AddRoute(optimalRoute);
-			
+			}			
+			schedule.AddRoute(optimalRoute);			
 			out.printf("Optimal route: %s\n", optimalRoute.toString());
 		}
-
 
 		return schedule;
 
@@ -124,7 +114,6 @@ public class Main {
 		System.out.println("Visualizing the schedule");
 		Vector<Route> routes = schedule.Routes();
 		
-		
 		Vector<Color>colors = new Vector<Color>();
 		colors.add(Color.BLUE);
 		colors.add(Color.BLACK);
@@ -132,10 +121,6 @@ public class Main {
 		colors.add(Color.YELLOW);
 		colors.add(Color.GREEN);
 		colors.add(Color.PINK);
-		
-		
-		
-		
 		
 		Visualization randomMap = new Visualization();
 		
@@ -146,8 +131,7 @@ public class Main {
 				coor.add(new Coordinate(route.getCities().get(j).X(), route.getCities().get(j).Y()));
 			}
 			
-			randomMap.ColourRoute(coor, colors.get(i));
-			
+			randomMap.ColourRoute(coor, colors.get(i));			
 		}
 		
 		randomMap.Show();
