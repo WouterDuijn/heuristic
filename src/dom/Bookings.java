@@ -1,6 +1,8 @@
 package dom;
 
+import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Random;
 
 public class Bookings {
@@ -44,6 +46,16 @@ public class Bookings {
 	public String toString() {
 		return bookings.toString();
 		
+	}
+
+	public void AdjustPassengerMatrix(Matrix matrix) {
+		Enumeration<Integer> enumKey = bookings.keys();
+		while(enumKey.hasMoreElements()) {
+		    Integer key = enumKey.nextElement();
+		    Booking booking = bookings.get(key);
+		    
+		    matrix.UpdatePassengers(booking.From(), booking.To(), -booking.Pax());
+		}
 	}
 
 }
