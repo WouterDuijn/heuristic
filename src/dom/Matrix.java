@@ -1,7 +1,5 @@
 package dom;
 
-import java.util.Arrays;
-
 public class Matrix {
 
 	private double[][] distances;
@@ -42,7 +40,6 @@ public class Matrix {
 		passengers[id1][id2]+=amount;
 	}
 		
-
 	public int[][] DeepCopyPassengers() {
 		if(passengers == null) {
 			return null;
