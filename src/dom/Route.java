@@ -206,7 +206,7 @@ public class Route {
 				"Tank\t" + this.tank.toString() +"\n" +
 				"Distances\t" + this.distances.toString() + "\n" +
 				"Bookings\t" + this.bookings.toString()) + "\n" +
-				"Time\t" + this.current_time + "\n" + "Profit\t" + this.profit;
+				"Time\t" + this.current_time + "\n" + "Profit\t€" + this.profit;
 	}
 
 

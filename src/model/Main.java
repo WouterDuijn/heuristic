@@ -71,9 +71,16 @@ public class Main {
 		}
 		return best_schedule;
 	}
+	
+	// added printing method so RandomModel wouldn't print when used in HillClimbingModel
+	void printSchedule(Schedule schedule) {
+		for(int i=0; i<schedule.Routes().size(); i++) {
+			out.printf(schedule.Routes().get(i).toString());
+			out.println('\n');
+		}
+	}
 
 	Schedule RandomModel(Cities cities, Matrix inputMatrix) {
-
 		Schedule schedule = new Schedule(inputMatrix);
 
 		for(int k=0; k<NR_PLANES;k++) {
@@ -143,7 +150,7 @@ public class Main {
 				}	
 			}			
 			schedule.AddRoute(optimalRoute);			
-			out.printf("Optimal route: %s\n", optimalRoute.toString());
+			//out.printf("Optimal route: %s\n", optimalRoute.toString());
 		}
 
 		return schedule;
@@ -188,10 +195,13 @@ public class Main {
 		//Random Model
 		System.out.println("Running the random model");
 		//Route route = RandomModel(cities, matrix);
-		//Schedule schedule = RandomModel(cities, matrix);
-		//visualizeSchedule(schedule);
+		Schedule schedule = RandomModel(cities, matrix);
+		printSchedule(schedule);
+		visualizeSchedule(schedule);
 		
+		out.println("Running the hill climbing model");
 		Schedule optimal_schedule = HillClimbingModel(cities, matrix);
+		printSchedule(optimal_schedule);
 		visualizeSchedule(optimal_schedule);
 
 	}
