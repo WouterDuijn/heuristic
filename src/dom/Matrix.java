@@ -7,10 +7,19 @@ public class Matrix {
 	private double[][] distances;
 	private int[][] passengers;
 	
+	/*public Matrix(Matrix matrix) {
+		this.passengers = (int[][])matrix.passengers.clone();
+		this.distances = (double[][])matrix.distances.clone();
+	}*/
+	
 	public Matrix(Matrix matrix) {
-		this.passengers = matrix.passengers.clone();
-		this.distances = matrix.distances.clone();
+		this.passengers = matrix.clonedPassengers();
+		this.distances = matrix.distances;
 	}
+	
+	/*public Matrix(int[][] passengers) {
+		this.passengers = (int[][])passengers.clone();
+	}*/
 	
 	public Matrix() {
 	}
@@ -79,6 +88,19 @@ public class Matrix {
 	
 	// added, 1 method for all.
 	
+	public int[][] clonedPassengers() {
+		if(passengers == null) {
+			return null;
+		}
+		
+		int[][] copy = new int[passengers.length][passengers[0].length];
+		for (int i = 0; i < copy.length; i++) {
+			copy[i] = passengers[i].clone();
+		}
+		return copy;
+		
+	}
+	
 	public Matrix deepCopyMatrix() {
 	    // what about matrix = null?
 		
@@ -88,11 +110,11 @@ public class Matrix {
 	    
 	    
 	    for (int j = 0; j < distances.length; j++) {
-	    	distancesCopy[j] = distancesCopy[j].clone();
+	    	distancesCopy[j] = distances[j].clone();
 	    }
 	    
 	    for (int i = 0; i < passengers.length; i++) {
-	        passengersCopy[i] = passengersCopy[i].clone();
+	        passengersCopy[i] = passengers[i].clone();
 	    }
 	    
 	    return result;
