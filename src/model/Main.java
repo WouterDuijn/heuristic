@@ -4,9 +4,9 @@ import dom.Cities;
 import dom.Visualization;
 import dom.Matrix;
 import dom.Route;
+import dom.Schedule;
 import dom.Parser;
 import dom.Coordinate;
-import dom.RefuelTankTime;
 import java.awt.Color;
 import java.io.PrintStream;
 import java.util.Vector;
@@ -27,34 +27,75 @@ public class Main {
 		rn = new Random();
 	}
 
-	void Model(Cities cities, Matrix matrix) {
-		//Run model
-		boolean cont = true;
+	// moeten hier deep copies gemaakt worden van de Schedules of kan het zo?
+	Schedule HillClimbingModel(Cities cities, Matrix matrix) {
+		//boolean cont = true;
+		Vector<Schedule> schedules = new Vector<Schedule>();
+		Vector<Schedule> optimal_schedules = new Vector<Schedule>();
+		double profit_improvement = 10; // if diff between optimal and current profit <= 10, stop?
+		// or if X number of iterations reached, stop?
+			
+		// create 5 initial random schedules
+		for(int i = 0; i<5; i++) {
+			schedules.add(RandomModel(cities, matrix));
+		}
+
+		// Hill climbing algorithm (run all 5 schedules to find 5 local optima)
+		Schedule optimal_schedule;
+		Schedule current_schedule;
+		double highest_profit;
+		double current_profit;
+		
+		for(int i = 0; i<schedules.size(); i++) {
+			optimal_schedule = schedules.get(i); // only necessary if no while loop executed
+			current_schedule = schedules.get(i);
+			highest_profit = 0;
+			current_profit = current_schedule.Profit();
+			
+			while(current_profit>highest_profit && current_profit-highest_profit>profit_improvement) {
+				optimal_schedule = current_schedule;
+				highest_profit = current_profit;
+
+				// perform mutations
+			}
+			optimal_schedules.add(optimal_schedule);
+		}
+		
+		// Determine best schedule of local optima
+		Schedule best_schedule = new Schedule(matrix);
+		for(int j = 0; j<optimal_schedules.size(); j++) {
+			current_schedule = optimal_schedules.get(j);
+			if(current_schedule.Profit() > best_schedule.Profit()) {
+				best_schedule = current_schedule;
+			}
+		}
+		return best_schedule;
+	}
+	
+	// added printing method so RandomModel wouldn't print when used in HillClimbingModel
+	void printSchedule(Schedule schedule) {
+		for(int i=0; i<schedule.Routes().size(); i++) {
+			out.printf(schedule.Routes().get(i).toString());
+			out.println('\n');
+		}
+		out.printf("Total profit\t€%.2f\n", schedule.Profit());
 	}
 
-	Vector<Route> RandomModel(Cities cities, Matrix inputMatrix) {
+	Schedule RandomModel(Cities cities, Matrix inputMatrix) {
+		Schedule schedule = new Schedule(inputMatrix);
 
-		Vector<Route> schedule = new Vector<Route>();
-		Matrix updatedMatrix = new Matrix(inputMatrix);
-		
-		for(int k=0; k<1;k++) {
-
+		for(int k=0; k<NR_PLANES;k++) {
 			Route optimalRoute =new Route();
-			//Matrix updated = new Matrix(updatedMatrix);
-			//Matrix updated = updatedMatrix.deepCopy();
 
 			//TODO: think of a good stop condition
-			for(int j = 0; j<10000; j++){ // create 10000 routes to find best
+			for(int j = 0; j<1000; j++){ // create 10000 routes to find best
 
-				Matrix matrix = new Matrix(updatedMatrix);
-
-				//TODO: deepcopy matrix
 				int randomStartCity = rn.nextInt(cities.size());
 				Route route = new Route(cities.getCity(randomStartCity));
+				Matrix matrix = new Matrix(schedule.Matrix());
 
 				for(int i = 0; i<200; i++){ // to create 1 route
 					Route cur_route= new Route(route);
-					Matrix current_matrix = new Matrix(matrix);
 					int randomCity = rn.nextInt(cities.size());
 
 					if(cur_route.getCities().size()<3){
@@ -66,25 +107,17 @@ public class Main {
 					//Is the index to insert the city in the route.
 					int randomIndex =rn.nextInt(cur_route.size()-1)+1;
 
-					//TODO: random passenger should bear in mind that limited nr of passengers given city pair
 					int before = cur_route.getCities().get(randomIndex-1).ID();
 					int beyond = cur_route.getCities().get(randomIndex).ID();
 
-					int available_passengers1= current_matrix.Passengers(before, randomCity);
-					//out.println(available_passengers1);
-					int available_passengers2= current_matrix.Passengers(randomCity, beyond);
-					//out.println(available_passengers2);
-					//out.println();
-					if(available_passengers1<0 || available_passengers2<0) {
-						out.printf("%d, %d",available_passengers1,available_passengers2);
-					}
+					int available_passengers1= matrix.Passengers(before, randomCity);
+					int available_passengers2= matrix.Passengers(randomCity, beyond);
 					
 					int randomPassenger1 = rn.nextInt(Math.min(available_passengers1, (Route.getMaxPassengers()-
 							cur_route.getPassengers().get(randomIndex-1)))+1);
 
 					int randomPassenger2 = rn.nextInt(Math.min(available_passengers2, (Route.getMaxPassengers()-
 							cur_route.getPassengers().get(randomIndex-1)))+1);
-
 
 					//Are the two new distances of the two new edges created by inserting a new city
 					double distance1=inputMatrix.Distance(cur_route.getCities().get(randomIndex-1).ID(), cities.getID(randomCity));
@@ -104,9 +137,9 @@ public class Main {
 						route = new Route(cur_route);
 
 						//Adjust passenger matrix
-						current_matrix.UpdatePassengers(before, randomCity, -randomPassenger1);
-						current_matrix.UpdatePassengers(randomCity, beyond, -randomPassenger2);
-						matrix = new Matrix(current_matrix);
+						matrix.UpdatePassengers(before, randomCity, -randomPassenger1);
+						matrix.UpdatePassengers(randomCity, beyond, -randomPassenger2);
+						//matrix = new Matrix(current_matrix);
 						
 					}
 					route.CheckValidity();
@@ -116,94 +149,41 @@ public class Main {
 				if(route.profit > optimalRoute.profit){
 					optimalRoute = new Route(route);
 				}	
-
-			}
-			schedule.add(optimalRoute);
-			
-			for(int n=1; n<optimalRoute.getCities().size();n++) {
-				int departureCity = optimalRoute.getCities().get(n-1).ID();
-				int arrivalCity = optimalRoute.getCities().get(n).ID();
-				int passengersOnFlight = optimalRoute.getPassengers().get(n-1);
-				updatedMatrix.UpdatePassengers(departureCity, arrivalCity, -passengersOnFlight);
-				
-			for (int p =0; p<28; p++){
-				for(int q =0; q<28; q++){
-					if(updatedMatrix.Passengers(p,q)<0) {
-						out.printf("%d, index(%d,%d) ",updatedMatrix.Passengers(p, q),p,q);
-					}
-					//out.printf("%d ",updatedMatrix.Passengers(p, q));
-				}
-			//	out.println();
-			}
-			out.println();
-			}
-	
-			out.printf("Optimal route: %s\n", optimalRoute.toString());
-			/*out.printf("Maximum profit: €%.2f\n", optimalRoute.profit);
-			out.printf("Current time: %.2f\n", optimalRoute.current_time);
-			out.println();*/
-			//return optimalRoute;
-			
-			/*for (int p =0; p<28; p++){
-				for(int q =0; q<28; q++){
-					out.printf("%d ",updatedMatrix.Passengers(p, q));
-				}
-				out.println();
-			}
-			out.println();*/
+			}			
+			schedule.AddRoute(optimalRoute);			
+			//out.printf("Optimal route: %s\n", optimalRoute.toString());
 		}
 
 		return schedule;
 
 	}
 
-	void visualizeRandomModel(Vector<Route> routes){
+	void visualizeSchedule(Schedule schedule){
+		System.out.println("Visualizing the schedule\n");
+		Vector<Route> routes = schedule.Routes();
+		
+		Vector<Color>colors = new Vector<Color>();
+		colors.add(Color.BLUE);
+		colors.add(Color.BLACK);
+		colors.add(Color.RED);
+		colors.add(Color.YELLOW);
+		colors.add(Color.GREEN);
+		colors.add(Color.PINK);
+		
 		Visualization randomMap = new Visualization();
 		
-		Vector<Coordinate> coor1 = new Vector<Coordinate>();
-		for(int i =0; i<routes.get(0).getCities().size();i++){
-			coor1.add(new Coordinate(routes.get(0).getCities().get(i).X(), routes.get(0).getCities().get(i).Y()));
+		for(int i=0;i<routes.size();i++) {
+			Route route = routes.get(i);
+			Vector<Coordinate> coor = new Vector<Coordinate>();
+			for(int j =0; j<route.getCities().size();j++){
+				coor.add(new Coordinate(route.getCities().get(j).X(), route.getCities().get(j).Y()));
+			}
+			
+			randomMap.ColourRoute(coor, colors.get(i));			
 		}
-		randomMap.ColourRoute(coor1, Color.BLUE);	
 		
-		Vector<Coordinate> coor2 = new Vector<Coordinate>();
-		for(int i =0; i<routes.get(1).getCities().size();i++){
-			coor2.add(new Coordinate(routes.get(1).getCities().get(i).X(), routes.get(1).getCities().get(i).Y()));
-		}
-		randomMap.ColourRoute(coor2, Color.GREEN);
-		
-		Vector<Coordinate> coor3 = new Vector<Coordinate>();
-		for(int i =0; i<routes.get(2).getCities().size();i++){
-			coor3.add(new Coordinate(routes.get(2).getCities().get(i).X(), routes.get(2).getCities().get(i).Y()));
-		}
-		randomMap.ColourRoute(coor3, Color.RED);
-		
-		Vector<Coordinate> coor4 = new Vector<Coordinate>();
-		for(int i =0; i<routes.get(3).getCities().size();i++){
-			coor4.add(new Coordinate(routes.get(3).getCities().get(i).X(), routes.get(3).getCities().get(i).Y()));
-		}
-		randomMap.ColourRoute(coor4, Color.YELLOW);
-		
-		Vector<Coordinate> coor5 = new Vector<Coordinate>();
-		for(int i =0; i<routes.get(4).getCities().size();i++){
-			coor5.add(new Coordinate(routes.get(4).getCities().get(i).X(), routes.get(4).getCities().get(i).Y()));
-		}
-		randomMap.ColourRoute(coor5, Color.BLACK);
-		
-		Vector<Coordinate> coor6 = new Vector<Coordinate>();
-		for(int i =0; i<routes.get(5).getCities().size();i++){
-			coor6.add(new Coordinate(routes.get(5).getCities().get(i).X(), routes.get(5).getCities().get(i).Y()));
-		}
-		randomMap.ColourRoute(coor6, Color.PINK);
 		randomMap.Show();
-		
-		/*Vector<Coordinate> coor = new Vector<Coordinate>();
-		for(int i =0; i<route.getCities().size();i++){
-			coor.add(new Coordinate(route.getCities().get(i).X(), route.getCities().get(i).Y()));
-		}
-		Visualization randomMap = new Visualization();
-		randomMap.ColourRoute(coor, Color.BLUE);
-		randomMap.Show();*/
+
 	}
 
 	void start() {
@@ -216,8 +196,14 @@ public class Main {
 		//Random Model
 		System.out.println("Running the random model");
 		//Route route = RandomModel(cities, matrix);
-		Vector<Route> schedule = RandomModel(cities, matrix);
-		//visualizeRandomModel(schedule);
+		Schedule schedule = RandomModel(cities, matrix);
+		printSchedule(schedule);
+		visualizeSchedule(schedule);
+		
+		out.println("Running the hill climbing model");
+		Schedule optimal_schedule = HillClimbingModel(cities, matrix);
+		printSchedule(optimal_schedule);
+		visualizeSchedule(optimal_schedule);
 
 	}
 

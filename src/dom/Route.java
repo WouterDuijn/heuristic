@@ -1,6 +1,7 @@
 package dom;
 
 import java.io.PrintStream;
+import java.util.Hashtable;
 import java.util.Random;
 import java.util.Vector;
 
@@ -134,12 +135,9 @@ public class Route {
 		distances.setElementAt(distance2, index-1);
 		distances.add(index-1, distance1);
 		
-		
-		
 		//Declare empty refuel vectors
 		Vector<Double>tank = new Vector<Double>();
 
-		
 		for(int i=1;i<cities.size();i++) {
 			
 			double current_tank = MAX_FUEL_DISTANCE;
@@ -207,7 +205,8 @@ public class Route {
 				"Passengers\t" + this.passengers.toString() +"\n" +
 				"Tank\t" + this.tank.toString() +"\n" +
 				"Distances\t" + this.distances.toString() + "\n" +
-				"Bookings\t" + this.bookings.toString());
+				"Bookings\t" + this.bookings.toString()) + "\n" +
+				"Time\t" + this.current_time + "\n" + "Profit\t€" + this.profit;
 	}
 
 
@@ -238,6 +237,12 @@ public class Route {
 		}
 	}
 	
+	public void AdjustPassengerMatrixFromBookings(Matrix matrix) {
+		bookings.AdjustPassengerMatrix(matrix);
+	}
+	
+	
+	
 	/**
 	 * 
 	 * @param rn is random variable
@@ -252,13 +257,68 @@ public class Route {
 		}else if(choice==1) {
 			return CitySwap(rn, matrix);
 		}else if(choice==2) {
-			//TODO:Passenger adjustment
+			return PassengerAdjustment(rn, matrix);
 		}else if(choice==3) {
 			//TODO:City add/remove
 		}
 		
 		return false;
 	}
+	
+	
+	/**
+	 * Adds passengers to random departing and arrival city
+	 * @param rn is random object
+	 * @param matrix is the matrix that gets updated
+	 * @return whether new passengers have been updated
+	 */
+	private boolean PassengerAdjustment(Random rn, Matrix matrix) {
+		
+		//Pick random flight leg
+		int index = rn.nextInt(cities.size()-1);
+		City departcity = cities.get(index);
+		City arrivalcity = cities.get(index+1);
+		
+		//Determine capacity left and available passengers
+		int free_capacity = MAX_PASSENGERS - passengers.get(index);
+		
+		
+		//No room or passengers available thus return false
+		if(free_capacity==0) {
+			return false;
+		}
+		
+		
+		//Search for arrivalcity with available passengers
+		while(matrix.Passengers(departcity.ID(),arrivalcity.ID())==0) {
+			index++;
+			if(index+1==cities.size()) {
+				//Every possible departure city has no passengers available from departure city (always including detours)
+				return false;
+			}
+			
+			arrivalcity = cities.get(index+1);
+			
+			//Free capacity is minimum of all the legs capacity
+			free_capacity = Math.min(free_capacity, passengers.get(index));
+		}
+		
+		if(free_capacity==0) {
+			//No capacity over all legs
+			return false;
+		}
+		
+		//Determine the number of passengers to book
+		int extra_booked_passengers = Math.min(free_capacity, matrix.Passengers(departcity.ID(), arrivalcity.ID()));
+		
+		
+		//Add booking and update passenger matrix
+		bookings.AddBooking(new Booking(departcity.ID(), arrivalcity.ID(), extra_booked_passengers));
+		matrix.UpdatePassengers(departcity.ID(), arrivalcity.ID(), -extra_booked_passengers);
+		
+		return true;
+	}
+	
 	
 	/**
 	 * 
