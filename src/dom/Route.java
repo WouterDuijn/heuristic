@@ -604,7 +604,7 @@ public class Route {
 			
 			int available_passengers = matrix.Passengers(c1.ID(), c2.ID());
 			
-
+			System.out.println(free_capacity);
 			
 			//Update the new passengers
 			int new_direct_passengers = rn.nextInt(Math.min(available_passengers, free_capacity)+1);
@@ -635,7 +635,7 @@ public class Route {
 				}
 			}
 			
-			
+			System.out.println();
 			
 			bookings.AddBooking(new Booking(c1.ID(),c2.ID(), new_direct_passengers));
 			profit+= matrix.Distance(c1.ID(), c2.ID())*new_direct_passengers;
