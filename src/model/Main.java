@@ -27,9 +27,58 @@ public class Main {
 		rn = new Random();
 	}
 
-	void Model(Cities cities, Matrix matrix) {
-		//Run model
-		boolean cont = true;
+	// moeten hier deep copies gemaakt worden van de Schedules of kan het zo?
+	Schedule HillClimbingModel(Cities cities, Matrix matrix) {
+		//boolean cont = true;
+		Vector<Schedule> schedules = new Vector<Schedule>();
+		Vector<Schedule> optimal_schedules = new Vector<Schedule>();
+		double profit_improvement = 10; // if diff between optimal and current profit <= 10, stop?
+		// or if X number of iterations reached, stop?
+			
+		// create 5 initial random schedules
+		for(int i = 0; i<5; i++) {
+			schedules.add(RandomModel(cities, matrix));
+		}
+
+		// Hill climbing algorithm (run all 5 schedules to find 5 local optima)
+		Schedule optimal_schedule;
+		Schedule current_schedule;
+		double highest_profit;
+		double current_profit;
+		
+		for(int i = 0; i<schedules.size(); i++) {
+			optimal_schedule = schedules.get(i); // only necessary if no while loop executed
+			current_schedule = schedules.get(i);
+			highest_profit = 0;
+			current_profit = current_schedule.Profit();
+			
+			while(current_profit>highest_profit && current_profit-highest_profit>profit_improvement) {
+				optimal_schedule = current_schedule;
+				highest_profit = current_profit;
+
+				// perform mutations
+			}
+			optimal_schedules.add(optimal_schedule);
+		}
+		
+		// Determine best schedule of local optima
+		Schedule best_schedule = new Schedule(matrix);
+		for(int j = 0; j<optimal_schedules.size(); j++) {
+			current_schedule = optimal_schedules.get(j);
+			if(current_schedule.Profit() > best_schedule.Profit()) {
+				best_schedule = current_schedule;
+			}
+		}
+		return best_schedule;
+	}
+	
+	// added printing method so RandomModel wouldn't print when used in HillClimbingModel
+	void printSchedule(Schedule schedule) {
+		for(int i=0; i<schedule.Routes().size(); i++) {
+			out.printf(schedule.Routes().get(i).toString());
+			out.println('\n');
+		}
+		out.printf("Total profit\t€%.2f\n", schedule.Profit());
 	}
 
 	Schedule RandomModel(Cities cities, Matrix inputMatrix) {
@@ -92,7 +141,7 @@ public class Main {
 				}	
 			}			
 			schedule.AddRoute(optimalRoute);			
-			out.printf("Optimal route: %s\n", optimalRoute.toString());
+			//out.printf("Optimal route: %s\n", optimalRoute.toString());
 			
 			Matrix m = new Matrix(schedule.Matrix());
 			boolean check = optimalRoute.Mutate(rn, m, cities);
@@ -107,8 +156,8 @@ public class Main {
 
 	}
 
-	void visualizeRandomModel(Schedule schedule){
-		System.out.println("Visualizing the schedule");
+	void visualizeSchedule(Schedule schedule){
+		System.out.println("Visualizing the schedule\n");
 		Vector<Route> routes = schedule.Routes();
 		
 		Vector<Color>colors = new Vector<Color>();
@@ -146,7 +195,13 @@ public class Main {
 		System.out.println("Running the random model");
 		//Route route = RandomModel(cities, matrix);
 		Schedule schedule = RandomModel(cities, matrix);
-		visualizeRandomModel(schedule);
+		printSchedule(schedule);
+		visualizeSchedule(schedule);
+		
+		out.println("Running the hill climbing model");
+		Schedule optimal_schedule = HillClimbingModel(cities, matrix);
+		printSchedule(optimal_schedule);
+		visualizeSchedule(optimal_schedule);
 
 	}
 
