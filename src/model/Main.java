@@ -33,14 +33,13 @@ public class Main {
 	}
 
 	Schedule RandomModel(Cities cities, Matrix inputMatrix) {
-
 		Schedule schedule = new Schedule(inputMatrix);
 
-		for(int k=0; k<NR_PLANES;k++) {
+		for(int k=0; k<1;k++) {
 			Route optimalRoute =new Route();
 
 			//TODO: think of a good stop condition
-			for(int j = 0; j<1000; j++){ // create 10000 routes to find best
+			for(int j = 0; j<100; j++){ // create 10000 routes to find best
 
 				int randomStartCity = rn.nextInt(cities.size());
 				Route route = new Route(cities.getCity(randomStartCity));
@@ -64,28 +63,18 @@ public class Main {
 
 					int available_passengers1= matrix.Passengers(before, randomCity);
 					int available_passengers2= matrix.Passengers(randomCity, beyond);
-					
 					int randomPassenger1 = rn.nextInt(Math.min(available_passengers1, (Route.getMaxPassengers()-
 							cur_route.getPassengers().get(randomIndex-1)))+1);
-
 					int randomPassenger2 = rn.nextInt(Math.min(available_passengers2, (Route.getMaxPassengers()-
 							cur_route.getPassengers().get(randomIndex-1)))+1);
 
-					//Are the two new distances of the two new edges created by inserting a new city
-					double distance1=inputMatrix.Distance(cur_route.getCities().get(randomIndex-1).ID(), cities.getID(randomCity));
-					double distance2=inputMatrix.Distance(cities.getID(randomCity), cur_route.getCities().get(randomIndex).ID());
-
-					double incr_profit = distance1*randomPassenger1 + distance2*randomPassenger2;
-
 					cur_route.AddPassengers(randomIndex, randomPassenger1, randomPassenger2);
 
-					boolean valid_city_insert = cur_route.AddCity(cities.getCity(randomCity), randomIndex, distance1, distance2);
+					boolean valid_city_insert = cur_route.AddCity(cities.getCity(randomCity), randomIndex, inputMatrix,
+							randomPassenger1, randomPassenger2);
 
 					//If the city insertion in route is valid. Then update the route
 					if(valid_city_insert) {
-						cur_route.IncrementProfit(incr_profit);
-						cur_route.AddBooking(before, randomCity, randomPassenger1);
-						cur_route.AddBooking(randomCity, beyond, randomPassenger2);
 						route = new Route(cur_route);
 
 						//Adjust passenger matrix
@@ -104,6 +93,14 @@ public class Main {
 			}			
 			schedule.AddRoute(optimalRoute);			
 			out.printf("Optimal route: %s\n", optimalRoute.toString());
+			
+			Matrix m = new Matrix(schedule.Matrix());
+			boolean check = optimalRoute.Mutate(rn, m, cities);
+			System.out.println(check);
+			if(check) {
+				System.out.println(optimalRoute.toString());
+			}
+
 		}
 
 		return schedule;

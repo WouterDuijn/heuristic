@@ -15,6 +15,13 @@ public class City {
 		this.y=y;
 	}
 	
+	public City(City city) {
+		name=city.name;
+		id=city.id;
+		x=city.x;
+		y=city.y;
+	}
+	
 	public int ID(){
 		return id;
 	}

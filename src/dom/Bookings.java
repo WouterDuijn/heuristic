@@ -4,6 +4,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.Vector;
 
 public class Bookings {
 	
@@ -39,13 +40,29 @@ public class Bookings {
 		bookings.remove(new Booking(city1, city2, 0).Hash());
 	}
 	
+	public Vector<Booking> RemoveBookingsCity(int city, Matrix matrix){
+		Vector<Booking> result = new Vector<Booking>();
+		
+		Enumeration<Integer> enumKey = bookings.keys();
+		while(enumKey.hasMoreElements()) {
+		    Integer key = enumKey.nextElement();
+		    Booking booking = bookings.get(key);
+		    if(booking.From()==city || booking.To()==city) {
+		    	//Remove booking as departing or arriving city
+		    	result.add(booking);
+		    	bookings.remove(booking.Hash());
+		    	matrix.UpdatePassengers(booking.From(), booking.To(), booking.Pax());
+		    } 
+		}
+		return result;
+	}
+	
 	public int size(){
 		return bookings.size();
 	}
 	
 	public String toString() {
-		return bookings.toString();
-		
+		return bookings.toString();	
 	}
 
 	public void AdjustPassengerMatrix(Matrix matrix) {
