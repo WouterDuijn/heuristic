@@ -1,7 +1,6 @@
 package dom;
 
 import java.io.PrintStream;
-import java.util.Hashtable;
 import java.util.Random;
 import java.util.Vector;
 
@@ -14,7 +13,6 @@ public class Route {
 	private static final int SPEED=800;
 	private static final int MAX_PASSENGERS = 199;
 
-	
 	private Vector<City> cities;
 	private Vector<Double> tank; //number of kilometers the plane can still travel after arrival at a city
 	public double current_time;
@@ -73,10 +71,12 @@ public class Route {
 	public int size(){
 		return cities.size();
 	}
-
-	public boolean needsRefuel(int index, double distance1, double distance2) {
-		if(tank.get(index-1)-distance1<=0 || tank.get(index-1)-distance1-distance2<=0){
-			return true;
+	
+	public boolean CityPresent(City city) {
+		for(City c: cities) {
+			if(c.ID()==city.ID()) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -146,8 +146,8 @@ public class Route {
 
 	public void AddPassengers(int index, int passengers1, int passengers2) {
 		int passengers_on_edge = passengers.get(index-1);
-		passengers.set(index-1, passengers_on_edge+passengers2);
-		passengers.add(index-1, passengers_on_edge+passengers1);
+		SetPassengers(index-1, passengers_on_edge+passengers2);
+		AddPassengers(index-1, passengers_on_edge+passengers1);
 	}
 
 
@@ -168,6 +168,26 @@ public class Route {
 
 	public Vector<City> getCities() {
 		return cities;
+	}
+	
+	private void AddPassengers(int index, int amount) {
+		passengers.add(index, amount);
+		if(passengers.get(index)>MAX_PASSENGERS ||
+				passengers.get(index)<0) {
+			throw new RuntimeException("Here");
+		}
+	}
+	
+	private void AddPassengers(int amount) {
+		passengers.add( amount);
+	}
+	
+	private void SetPassengers(int index, int amount) {
+		passengers.set(index, amount);
+		if(passengers.get(index)>MAX_PASSENGERS ||
+				passengers.get(index)<0) {
+			throw new RuntimeException("Here");
+		}
 	}
 
 
@@ -238,8 +258,7 @@ public class Route {
 	 * @return whether the mutation is succesfull. Note: the matrix is also adjusted and should be beared in mind
 	 */
 	public boolean Mutate(Random rn, Matrix matrix, Cities cities_list) {
-		int choice = 0;
-		
+		int choice = rn.nextInt(4);
 		if(choice==0) {
 			return SwapDetour(rn, matrix);
 		}else if(choice==1) {
@@ -299,7 +318,7 @@ public class Route {
 				for(int j = index;j<cities.size()-1;j++) {
 					//Decrease passengers in flight for that leg
 					//TODO: check j
-					passengers.set(j, passengers.get(j)- booking.Pax());
+					SetPassengers(j, passengers.get(j)- booking.Pax());
 					if(booking.To()==cities.get(j+1).ID()) {
 						break;
 					}
@@ -309,7 +328,16 @@ public class Route {
 				for(int j = index-1;j>=0;j--) {
 					//Decrease passengers in flight for that leg
 					//TODO: check j
-					passengers.set(j, passengers.get(j)- booking.Pax());
+					if(passengers.get(j)- booking.Pax()< 0) {
+						System.out.println(j);
+						System.out.println(this.toString());
+						System.out.println(city2replace.toString());
+						System.out.println(booking.toString());
+						throw new RuntimeException("Joe");
+					}
+					
+					
+					SetPassengers(j, passengers.get(j)- booking.Pax());
 					if(booking.From()==cities.get(j).ID()) {
 						break;
 					}
@@ -330,7 +358,6 @@ public class Route {
 		
 		current_time = fly_time + tank_moments + board_time;
 		
-		
 		if(current_time > DAY_LENGTH) {
 			return false;
 		}
@@ -339,8 +366,8 @@ public class Route {
 		//Add Passenger & Bookings & update profit
 		int to_random_city_passengers = Math.min(MAX_PASSENGERS - passengers.get(index-1), matrix.Passengers(before.ID(), city2insert.ID()));
 		int from_random_city_passengers = Math.min(MAX_PASSENGERS - passengers.get(index), matrix.Passengers(city2insert.ID(), beyond.ID()));
-		passengers.set(index-1, passengers.get(index-1)+ to_random_city_passengers);
-		passengers.set(index, passengers.get(index)+ from_random_city_passengers);
+		SetPassengers(index-1, passengers.get(index-1)+ to_random_city_passengers);
+		SetPassengers(index, passengers.get(index)+ from_random_city_passengers);
 		bookings.AddBooking(new Booking(before.ID(), city2insert.ID(), to_random_city_passengers));
 		bookings.AddBooking(new Booking(city2insert.ID(), beyond.ID(), from_random_city_passengers));
 		profit+= matrix.Distance(before.ID(),city2insert.ID())*to_random_city_passengers;
@@ -414,7 +441,7 @@ public class Route {
 			arrivalcity = cities.get(index+1);
 			
 			//Free capacity is minimum of all the legs capacity
-			free_capacity = Math.min(free_capacity, passengers.get(index));
+			free_capacity = Math.min(free_capacity, MAX_PASSENGERS - passengers.get(index));
 		}
 		
 		if(free_capacity==0) {
@@ -425,8 +452,22 @@ public class Route {
 		//Determine the number of passengers to book
 		int extra_booked_passengers = Math.min(free_capacity, matrix.Passengers(departcity.ID(), arrivalcity.ID()));
 		
+		System.out.println(free_capacity);
+		
+		
 		for(int i=departcity_index;i<cities.size()-1;i++) {
-			passengers.set(i, passengers.get(i) + extra_booked_passengers);
+			if(passengers.get(i) + extra_booked_passengers> MAX_PASSENGERS) {
+				System.out.println(this.toString());
+				System.out.println(arrivalcity.toString());
+				System.out.println(departcity.toString());
+				System.out.println(free_capacity);
+				System.out.println(matrix.Passengers(departcity.ID(), arrivalcity.ID()));
+				System.out.println(passengers.get(i));
+				System.out.println(i);
+				
+				throw new RuntimeException("Route invalid");
+			}
+			SetPassengers(i, passengers.get(i) + extra_booked_passengers);
 			if(cities.get(i+1).ID() ==arrivalcity.ID()) {
 				break;
 			}
@@ -474,15 +515,19 @@ public class Route {
 		
 		//Remove current booking and passengers
 		Booking booking = bookings.GetBooking(c1.ID(), c2.ID());
-		bookings.RemoveBooking(c1.ID(), c2.ID());
-		profit-= matrix.Distance(c1.ID(),c2.ID())*booking.Pax();
-		matrix.UpdatePassengers(c1.ID(), c2.ID(), booking.Pax());
+		int booking_pax = 0;
+		if(booking!=null) {
+			bookings.RemoveBooking(c1.ID(), c2.ID());
+			profit-= matrix.Distance(c1.ID(),c2.ID())*booking.Pax();
+			matrix.UpdatePassengers(c1.ID(), c2.ID(), booking.Pax());
+			booking_pax = booking.Pax();
+		}
 		
 		//Set new passengers on flight
-		int free_capacity = MAX_PASSENGERS - (passengers.get(city_index) - booking.Pax());
+		int free_capacity = MAX_PASSENGERS - (passengers.get(city_index) - booking_pax);
 		int available_passengers = matrix.Passengers(c1.ID(), c2.ID());
-		int new_direct_passengers = rn.nextInt(Math.min(available_passengers, free_capacity))+1;
-		passengers.set(city_index, passengers.get(city_index) - booking.Pax() + new_direct_passengers);
+		int new_direct_passengers = rn.nextInt(Math.min(available_passengers, free_capacity)+1);
+		SetPassengers(city_index, passengers.get(city_index) - booking_pax + new_direct_passengers);
 		//Set/Updates the booking for the new passengers
 		bookings.AddBooking(new Booking(c1.ID(),c2.ID(), new_direct_passengers));
 		profit+= matrix.Distance(c2.ID(),c1.ID())*new_direct_passengers;
@@ -556,13 +601,42 @@ public class Route {
 			
 			//Check for capacity and available passengers on leg
 			int free_capacity = MAX_PASSENGERS - (passengers.get(i) - random_booking.Pax());
+			
 			int available_passengers = matrix.Passengers(c1.ID(), c2.ID());
+			
+
 			
 			//Update the new passengers
 			int new_direct_passengers = rn.nextInt(Math.min(available_passengers, free_capacity)+1);
-			passengers.set(i, passengers.get(i) - random_booking.Pax() + new_direct_passengers);
+			SetPassengers(i, passengers.get(i) - random_booking.Pax() + new_direct_passengers);
+			
+			if( passengers.get(i)<0) {
+				System.out.println(this.toString());
+				System.out.println(c1.toString());
+				System.out.println(c2.toString());
+				System.out.println(random_booking.toString());
+				System.out.println(passengers.get(i));
+				System.out.println(new_direct_passengers);
+				throw new RuntimeException("Free");
+			}
 			
 			//Set/Updates the booking for the new passengers
+			Booking b = bookings.GetBooking(c1.ID(),c2.ID());
+			
+			if(b!=null) {
+				if(b.Pax() + new_direct_passengers>199) {
+					System.out.println(this.toString());
+					System.out.println(c1.toString());
+					System.out.println(c2.toString());
+					System.out.println(random_booking.toString());
+					System.out.println(passengers.get(i));
+					System.out.println(new_direct_passengers);
+					throw new RuntimeException("Free");
+				}
+			}
+			
+			
+			
 			bookings.AddBooking(new Booking(c1.ID(),c2.ID(), new_direct_passengers));
 			profit+= matrix.Distance(c1.ID(), c2.ID())*new_direct_passengers;
 			matrix.UpdatePassengers(c1.ID(), c2.ID(), -new_direct_passengers);

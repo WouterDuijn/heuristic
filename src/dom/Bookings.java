@@ -2,7 +2,6 @@ package dom;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Random;
 import java.util.Vector;
 
@@ -15,7 +14,7 @@ public class Bookings {
 	}
 	
 	public Bookings(Bookings bookings) {
-		this.bookings =  new Hashtable<Integer, Booking>(bookings.bookings);
+		this.bookings = new Hashtable<Integer, Booking>( bookings.clone());
 	}
 	
 	public void AddBooking(Booking booking) {
@@ -24,6 +23,11 @@ public class Bookings {
 			current.SetPax(current.Pax()+booking.Pax());
 		}else {
 			bookings.put(booking.Hash(), booking);
+		}
+		
+		if(bookings.get(booking.Hash()).Pax()>199) {
+			System.out.println(bookings.toString());
+			throw new RuntimeException("Bookings");
 		}
 	}
 	
@@ -73,6 +77,16 @@ public class Bookings {
 		    
 		    matrix.UpdatePassengers(booking.From(), booking.To(), -booking.Pax());
 		}
+	}
+	
+	public Hashtable<Integer, Booking> clone() {
+		Hashtable<Integer, Booking> clone = new Hashtable<Integer, Booking>();
+		Enumeration<Integer> enumKey = bookings.keys();
+		while(enumKey.hasMoreElements()) {
+		    Booking booking = bookings.get(enumKey.nextElement());
+		    clone.put(booking.Hash(), booking);
+		}
+		return clone;
 	}
 
 }

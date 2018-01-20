@@ -38,6 +38,9 @@ public class Matrix {
 	
 	public void UpdatePassengers(int id1, int id2, int amount) {
 		passengers[id1][id2]+=amount;
+		if(passengers[id1][id2]<0) {
+			throw new RuntimeException("Passengers below zero");
+		}
 	}
 		
 	public int[][] DeepCopyPassengers() {

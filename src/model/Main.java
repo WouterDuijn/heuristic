@@ -1,6 +1,7 @@
 package model;
 
 import dom.Cities;
+import dom.City;
 import dom.Visualization;
 import dom.Matrix;
 import dom.Route;
@@ -14,7 +15,7 @@ import java.util.Random;
 
 public class Main {
 
-	public static final int NR_PLANES = 6;
+	public static final int NR_PLANES = 1;
 	public static final String INPUT_PATH = "C:\\workspace\\heuristic\\inp\\";
 
 	//tests
@@ -36,40 +37,23 @@ public class Main {
 		// or if X number of iterations reached, stop?
 			
 		// create 5 initial random schedules
-		for(int i = 0; i<5; i++) {
-			schedules.add(RandomModel(cities, matrix));
+		for(int i = 0; i<1; i++) {
+			Matrix m = new Matrix(matrix);
+			schedules.add(RandomModel(cities, m));
 		}
 
 		// Hill climbing algorithm (run all 5 schedules to find 5 local optima)
-		Schedule optimal_schedule;
-		Schedule current_schedule;
-		double highest_profit;
-		double current_profit;
+		Schedule current_schedule = new Schedule(schedules.get(0));
 		
-		for(int i = 0; i<schedules.size(); i++) {
-			optimal_schedule = schedules.get(i); // only necessary if no while loop executed
-			current_schedule = schedules.get(i);
-			highest_profit = 0;
-			current_profit = current_schedule.Profit();
-			
-			while(current_profit>highest_profit && current_profit-highest_profit>profit_improvement) {
-				optimal_schedule = current_schedule;
-				highest_profit = current_profit;
-
-				// perform mutations
-			}
-			optimal_schedules.add(optimal_schedule);
-		}
-		
-		// Determine best schedule of local optima
-		Schedule best_schedule = new Schedule(matrix);
-		for(int j = 0; j<optimal_schedules.size(); j++) {
-			current_schedule = optimal_schedules.get(j);
-			if(current_schedule.Profit() > best_schedule.Profit()) {
-				best_schedule = current_schedule;
+		for(int j=0;j< 100000;j++) {
+			Schedule s = new Schedule(current_schedule);
+			System.out.println(s.toString());
+			if(s.Mutate(rn, cities) && s.Profit()>current_schedule.Profit()) {
+				System.out.println(current_schedule.toString());
+				current_schedule = new Schedule(s);
 			}
 		}
-		return best_schedule;
+		return current_schedule;
 	}
 	
 	// added printing method so RandomModel wouldn't print when used in HillClimbingModel
@@ -84,10 +68,9 @@ public class Main {
 	Schedule RandomModel(Cities cities, Matrix inputMatrix) {
 		Schedule schedule = new Schedule(inputMatrix);
 
-		for(int k=0; k<1;k++) {
+		for(int k=0; k<NR_PLANES;k++) {
 			Route optimalRoute =new Route();
 
-			//TODO: think of a good stop condition
 			for(int j = 0; j<100; j++){ // create 10000 routes to find best
 
 				int randomStartCity = rn.nextInt(cities.size());
@@ -97,6 +80,11 @@ public class Main {
 				for(int i = 0; i<200; i++){ // to create 1 route
 					Route cur_route= new Route(route);
 					int randomCity = rn.nextInt(cities.size());
+					
+					City c = cities.getCity(randomCity);
+					if(cur_route.CityPresent(c)) {
+						continue;
+					}
 
 					if(cur_route.getCities().size()<3){
 						if(randomStartCity!=0){
@@ -125,11 +113,9 @@ public class Main {
 					//If the city insertion in route is valid. Then update the route
 					if(valid_city_insert) {
 						route = new Route(cur_route);
-
 						//Adjust passenger matrix
 						matrix.UpdatePassengers(before, randomCity, -randomPassenger1);
 						matrix.UpdatePassengers(randomCity, beyond, -randomPassenger2);
-						//matrix = new Matrix(current_matrix);
 						
 					}
 					route.CheckValidity();
@@ -142,13 +128,7 @@ public class Main {
 			}			
 			schedule.AddRoute(optimalRoute);			
 			//out.printf("Optimal route: %s\n", optimalRoute.toString());
-			
-			Matrix m = new Matrix(schedule.Matrix());
-			boolean check = optimalRoute.Mutate(rn, m, cities);
-			System.out.println(check);
-			if(check) {
-				System.out.println(optimalRoute.toString());
-			}
+
 
 		}
 
@@ -192,16 +172,18 @@ public class Main {
 		Matrix matrix = parser.ParseMatrices(cities.size());
 
 		//Random Model
-		System.out.println("Running the random model");
+		/*System.out.println("Running the random model");
 		//Route route = RandomModel(cities, matrix);
 		Schedule schedule = RandomModel(cities, matrix);
 		printSchedule(schedule);
-		visualizeSchedule(schedule);
+		visualizeSchedule(schedule);*/
 		
 		out.println("Running the hill climbing model");
 		Schedule optimal_schedule = HillClimbingModel(cities, matrix);
 		printSchedule(optimal_schedule);
 		visualizeSchedule(optimal_schedule);
+		
+		
 
 	}
 
