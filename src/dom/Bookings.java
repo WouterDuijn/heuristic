@@ -14,7 +14,7 @@ public class Bookings {
 	}
 	
 	public Bookings(Bookings bookings) {
-		this.bookings = new Hashtable<Integer, Booking>( bookings.clone());
+		this.bookings = new Hashtable<Integer, Booking>(bookings.clone());
 	}
 	
 	public void AddBooking(Booking booking) {
@@ -40,11 +40,11 @@ public class Bookings {
 		return bookings.get(new Booking(city1, city2,0).Hash());
 	}
 	
-	public void RemoveBooking(int city1, int city2) {
-		bookings.remove(new Booking(city1, city2, 0).Hash());
+	public Booking RemoveBooking(int city1, int city2) {
+		return bookings.remove(new Booking(city1, city2, 0).Hash());
 	}
 	
-	public Vector<Booking> RemoveBookingsCity(int city, Matrix matrix){
+	public Vector<Booking> RemoveBookingsCity(int city){
 		Vector<Booking> result = new Vector<Booking>();
 		
 		Enumeration<Integer> enumKey = bookings.keys();
@@ -55,8 +55,17 @@ public class Bookings {
 		    	//Remove booking as departing or arriving city
 		    	result.add(booking);
 		    	bookings.remove(booking.Hash());
-		    	matrix.UpdatePassengers(booking.From(), booking.To(), booking.Pax());
+
 		    } 
+		}
+		return result;
+	}
+	
+	public Vector<Booking> BookingsList(){
+		Vector<Booking> result = new Vector<Booking>();
+		Enumeration<Integer> enumKey = bookings.keys();
+		while(enumKey.hasMoreElements()) {
+		    result.add(bookings.get(enumKey.nextElement()));
 		}
 		return result;
 	}
@@ -87,6 +96,16 @@ public class Bookings {
 		    clone.put(booking.Hash(), booking);
 		}
 		return clone;
+	}
+	
+	public int TotalBookedPax() {
+		int result=0;
+		Enumeration<Integer> enumKey = bookings.keys();
+		while(enumKey.hasMoreElements()) {
+		    Booking booking = bookings.get(enumKey.nextElement());
+		    result+=booking.Pax();
+		}
+		return result;
 	}
 
 }

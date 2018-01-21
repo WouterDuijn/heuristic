@@ -53,9 +53,18 @@ public class Schedule {
 	
 	public String toString() {
 		String result="";
+		double total_profit = 0;
 		for(int i=0;i<routes.size();i++) {
 			result += routes.get(i).toString();
+			total_profit+=routes.get(i).profit;
 		}
+		result+= "Total Profit: $" + total_profit + "\n";
 		return result;
+	}
+	
+	public void CheckValidity() {
+		for(Route r: routes) {
+			r.CheckValidity();
+		}
 	}
 }

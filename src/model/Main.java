@@ -15,7 +15,7 @@ import java.util.Random;
 
 public class Main {
 
-	public static final int NR_PLANES = 1;
+	public static final int NR_PLANES = 6;
 	public static final String INPUT_PATH = "C:\\workspace\\heuristic\\inp\\";
 
 	//tests
@@ -37,23 +37,37 @@ public class Main {
 		// or if X number of iterations reached, stop?
 			
 		// create 5 initial random schedules
-		for(int i = 0; i<1; i++) {
+		for(int i = 0; i<5; i++) {
 			Matrix m = new Matrix(matrix);
 			schedules.add(RandomModel(cities, m));
 		}
-
-		// Hill climbing algorithm (run all 5 schedules to find 5 local optima)
-		Schedule current_schedule = new Schedule(schedules.get(0));
 		
-		for(int j=0;j< 100000;j++) {
-			Schedule s = new Schedule(current_schedule);
-			System.out.println(s.toString());
-			if(s.Mutate(rn, cities) && s.Profit()>current_schedule.Profit()) {
-				System.out.println(current_schedule.toString());
-				current_schedule = new Schedule(s);
+		for(int k =0;k<schedules.size();k++) {
+			// Hill climbing algorithm (run all 5 schedules to find 5 local optima)
+			Schedule current_schedule = new Schedule(schedules.get(k));
+			
+			
+			//TODO: Determine stop criteria. Now hardcoded to 100.000 mutations
+			for(int j=0;j< 100000;j++) {
+				Schedule s = new Schedule(current_schedule);
+				if(s.Mutate(rn, cities) && s.Profit()>current_schedule.Profit()) {
+					s.CheckValidity();
+					current_schedule = new Schedule(s);
+				}
 			}
+			optimal_schedules.add(current_schedule);
 		}
-		return current_schedule;
+		
+		Schedule best = new Schedule(optimal_schedules.get(0));
+		
+		for(Schedule s: optimal_schedules) {
+			if(s.Profit()>best.Profit()) {
+				best = new Schedule(s);
+			}
+			
+		}
+
+		return best;
 	}
 	
 	// added printing method so RandomModel wouldn't print when used in HillClimbingModel
@@ -67,10 +81,8 @@ public class Main {
 
 	Schedule RandomModel(Cities cities, Matrix inputMatrix) {
 		Schedule schedule = new Schedule(inputMatrix);
-
 		for(int k=0; k<NR_PLANES;k++) {
 			Route optimalRoute =new Route();
-
 			for(int j = 0; j<100; j++){ // create 10000 routes to find best
 
 				int randomStartCity = rn.nextInt(cities.size());
@@ -79,44 +91,29 @@ public class Main {
 
 				for(int i = 0; i<200; i++){ // to create 1 route
 					Route cur_route= new Route(route);
-					int randomCity = rn.nextInt(cities.size());
+					Matrix cur_matrix = new Matrix(matrix);
+					City city = cities.getCity(rn.nextInt(cities.size()));
 					
-					City c = cities.getCity(randomCity);
-					if(cur_route.CityPresent(c)) {
-						continue;
-					}
-
 					if(cur_route.getCities().size()<3){
 						if(randomStartCity!=0){
-							randomCity = 0;
+							//Set to AMS
+							city = cities.getCity(0);
 						}
 					}
 
-					//Is the index to insert the city in the route.
-					int randomIndex =rn.nextInt(cur_route.size()-1)+1;
+					if(cur_route.CityPresent(city)) {
+						continue;
+					}
 
-					int before = cur_route.getCities().get(randomIndex-1).ID();
-					int beyond = cur_route.getCities().get(randomIndex).ID();
+					
 
-					int available_passengers1= matrix.Passengers(before, randomCity);
-					int available_passengers2= matrix.Passengers(randomCity, beyond);
-					int randomPassenger1 = rn.nextInt(Math.min(available_passengers1, (Route.getMaxPassengers()-
-							cur_route.getPassengers().get(randomIndex-1)))+1);
-					int randomPassenger2 = rn.nextInt(Math.min(available_passengers2, (Route.getMaxPassengers()-
-							cur_route.getPassengers().get(randomIndex-1)))+1);
-
-					cur_route.AddPassengers(randomIndex, randomPassenger1, randomPassenger2);
-
-					boolean valid_city_insert = cur_route.AddCity(cities.getCity(randomCity), randomIndex, inputMatrix,
-							randomPassenger1, randomPassenger2);
+					boolean valid_city_insert = cur_route.AddCity(city, cur_matrix, rn);
 
 					//If the city insertion in route is valid. Then update the route
 					if(valid_city_insert) {
 						route = new Route(cur_route);
-						//Adjust passenger matrix
-						matrix.UpdatePassengers(before, randomCity, -randomPassenger1);
-						matrix.UpdatePassengers(randomCity, beyond, -randomPassenger2);
-						
+						matrix = new Matrix(cur_matrix);
+
 					}
 					route.CheckValidity();
 				}
@@ -127,9 +124,6 @@ public class Main {
 				}	
 			}			
 			schedule.AddRoute(optimalRoute);			
-			//out.printf("Optimal route: %s\n", optimalRoute.toString());
-
-
 		}
 
 		return schedule;
@@ -172,11 +166,11 @@ public class Main {
 		Matrix matrix = parser.ParseMatrices(cities.size());
 
 		//Random Model
-		/*System.out.println("Running the random model");
+		System.out.println("Running the random model");
 		//Route route = RandomModel(cities, matrix);
-		Schedule schedule = RandomModel(cities, matrix);
-		printSchedule(schedule);
-		visualizeSchedule(schedule);*/
+		//Schedule schedule = RandomModel(cities, matrix);
+		//printSchedule(schedule);
+		//visualizeSchedule(schedule);
 		
 		out.println("Running the hill climbing model");
 		Schedule optimal_schedule = HillClimbingModel(cities, matrix);

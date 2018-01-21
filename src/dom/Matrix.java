@@ -55,4 +55,18 @@ public class Matrix {
 		return copy;
 		
 	}
+	
+	public String PassengertoString() {
+		String result ="";
+		
+		for(int i=0;i<passengers.length;i++) {
+			result += "[ ";
+			for(int j=0;j<passengers.length;j++) {
+				result += passengers[i][j] + " ";
+			}
+			result +=  " ]\n";
+		}
+		
+		return result;
+	}
 }

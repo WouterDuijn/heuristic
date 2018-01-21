@@ -99,7 +99,20 @@ public class Route {
 	 * @param distance2  is the distance flown from city to insert to city beyond
 	 * @return whether the city insert is valid and doesnt exceed the time limit
 	 */
-	public boolean AddCity(City city, int index, Matrix matrix, int pax1, int pax2) {
+	public boolean AddCity(City city, Matrix matrix, Random rn) {
+		
+		//Is the index to insert the city in the route.
+		int index =rn.nextInt(this.size()-1)+1;
+		
+		City before = new City(cities.get(index-1));
+		City beyond = new City(cities.get(index));
+	
+		int available_passengers1= matrix.Passengers(before.ID(), city.ID());
+		int available_passengers2= matrix.Passengers(city.ID(), beyond.ID());
+		int randomPassenger1 = rn.nextInt(Math.min(available_passengers1, (Route.getMaxPassengers()-
+				passengers.get(index-1)))+1);
+		int randomPassenger2 = rn.nextInt(Math.min(available_passengers2, (Route.getMaxPassengers()-
+				passengers.get(index-1)))+1);
 
 		// if current_time above or equal to day length - 1 hour, no new flights can be added
 		// since only boarding and unboarding will already take an extra hour on top of flight
@@ -107,9 +120,6 @@ public class Route {
 		if(current_time >= DAY_LENGTH-1) {
 			return false; 
 		}
-		
-		City before = new City(cities.get(index-1));
-		City beyond = new City(cities.get(index));
 		
 		double distance1 = matrix.Distance(before.ID(), city.ID());
 		double distance2 = matrix.Distance(city.ID(), beyond.ID());
@@ -119,11 +129,6 @@ public class Route {
 		}
 
 		cities.add(index, city); 
-		
-		//City is same as neighbouring city
-		if(before.ID() == city.ID() || beyond.ID() == city.ID()) {
-			return false;
-		} 
 
 		//Newly calculate the distance vector
 		double fly_time = this.SetNewDistances(matrix);
@@ -136,20 +141,11 @@ public class Route {
 			return false;
 		}
 		
-		
-		profit+= distance1*pax1+distance2*pax2;
-		AddBooking(before.ID(), city.ID(), pax1);
-		AddBooking(city.ID(), beyond.ID(), pax2);
+		AddBooking(before.ID(), city.ID(), randomPassenger1, matrix);
+		AddBooking(city.ID(), beyond.ID(), randomPassenger2, matrix);
 		return true; 
 
 	}
-
-	public void AddPassengers(int index, int passengers1, int passengers2) {
-		int passengers_on_edge = passengers.get(index-1);
-		SetPassengers(index-1, passengers_on_edge+passengers2);
-		AddPassengers(index-1, passengers_on_edge+passengers1);
-	}
-
 
 	public static int getMaxPassengers() {
 		return MAX_PASSENGERS;
@@ -170,27 +166,6 @@ public class Route {
 		return cities;
 	}
 	
-	private void AddPassengers(int index, int amount) {
-		passengers.add(index, amount);
-		if(passengers.get(index)>MAX_PASSENGERS ||
-				passengers.get(index)<0) {
-			throw new RuntimeException("Here");
-		}
-	}
-	
-	private void AddPassengers(int amount) {
-		passengers.add( amount);
-	}
-	
-	private void SetPassengers(int index, int amount) {
-		passengers.set(index, amount);
-		if(passengers.get(index)>MAX_PASSENGERS ||
-				passengers.get(index)<0) {
-			throw new RuntimeException("Here");
-		}
-	}
-
-
 	public void setCities(Vector<City> cities) {
 		this.cities = cities;
 	}
@@ -201,16 +176,74 @@ public class Route {
 				"Tank\t" + this.tank.toString() +"\n" +
 				"Distances\t" + this.distances.toString() + "\n" +
 				"Bookings\t" + this.bookings.toString()) + "\n" +
-				"Time\t" + this.current_time + "\n" + "Profit\t" + this.profit;
+				"Time\t" + this.current_time + "\n" + "Profit\t" + this.profit + "\n";
 	}
 
-
-	public void IncrementProfit(double incr_profit) {
-		profit+=incr_profit;	
+	private void AddBooking(int cityid_from, int cityid_to, int nr_passengers, Matrix matrix) {
+		if(nr_passengers>0) {
+			bookings.AddBooking(new Booking(cityid_from, cityid_to, nr_passengers));
+			matrix.UpdatePassengers(cityid_from, cityid_to, -nr_passengers);
+			profit+=matrix.Distance(cityid_from, cityid_to)*nr_passengers;
+			
+			
+		}
+		PassengerSetByBookings();
+		
 	}
 	
-	public void AddBooking(int cityid_from, int cityid_to, int nr_passengers) {
-		bookings.AddBooking(new Booking(cityid_from, cityid_to, nr_passengers));
+	private void RemoveBooking(int city1, int city2, Matrix matrix) {
+		Booking b = bookings.RemoveBooking(city1, city2);
+		if(b!=null) {
+			matrix.UpdatePassengers(b.From(), b.To(), b.Pax());
+			profit-=matrix.Distance(city1, city1)*b.Pax();
+		}
+		
+		PassengerSetByBookings();
+	}
+	
+	private void RemoveBookingsCity(int city, Matrix matrix) {
+		for(Booking booking: bookings.RemoveBookingsCity(city)) {
+	    	matrix.UpdatePassengers(booking.From(), booking.To(), booking.Pax());
+	    	profit-=matrix.Distance(booking.From(), booking.To())*booking.Pax();
+		}
+		PassengerSetByBookings();
+	}
+	
+	private boolean PassengerSetByBookings() {
+		Vector<Integer> passengers= new Vector<Integer>();
+		for(int i=0;i<cities.size()-1;i++) {
+			passengers.add(0);
+		}
+		
+		for(Booking b : bookings.BookingsList()) {
+			int i1=0;
+			int i2=0;
+			
+			for(int i=0;i<cities.size()-1;i++) {
+				if(b.From()==cities.get(i).ID()) {
+					i1=i;
+					break;
+				}
+			}
+			
+			for(int i=i1+1;i<cities.size();i++) {
+				if(b.To()==cities.get(i).ID()) {
+					i2=i;
+					break;
+				}
+			}
+			
+			//Booking is from city at index i1 to i2
+			for(int i=i1;i<i2;i++) {
+				if(passengers.get(i) + b.Pax()>MAX_PASSENGERS) {
+					return false;
+				}
+				passengers.set(i, passengers.get(i) + b.Pax());
+				
+			}
+		}
+		this.passengers=new Vector<Integer>(passengers);
+		return true;
 	}
 
 
@@ -228,6 +261,14 @@ public class Route {
 		}
 		
 		if(this.cities.size()!=this.tank.size()) {
+			throw new RuntimeException("Route invalid");
+		}
+		int pas=0;
+		int book=bookings.TotalBookedPax();
+		for(int i: passengers) {
+			pas+=i;
+		}
+		if(pas<book) {
 			throw new RuntimeException("Route invalid");
 		}
 	}
@@ -286,7 +327,7 @@ public class Route {
 		City city2insert = cities_list.getCity(rn.nextInt(cities_list.size()));
 		
 		int occurence=0;
-		for(int i=1;i<cities.size()-1;i++) {
+		for(int i=0;i<cities.size()-1;i++) {
 			if(cities.get(i).ID() == city2insert.ID()) {
 				occurence++;
 			}
@@ -294,12 +335,12 @@ public class Route {
 		
 		//Check for non Amsterdam as well
 		while(before.ID() == city2insert.ID() || beyond.ID() == city2insert.ID() ||
-				city2insert.ID() == 0 || occurence>1) {
+				city2insert.ID() == 0 || occurence>0) {
 			//Search for new city without equal neighbours
 			city2insert = cities_list.getCity(rn.nextInt(cities_list.size()));
 			
 			occurence = 0;
-			for(int i=1;i<cities.size()-1;i++) {
+			for(int i=0;i<cities.size()-1;i++) {
 				if(cities.get(i).ID() == city2insert.ID()) {
 					occurence++;
 				}
@@ -308,46 +349,8 @@ public class Route {
 		}
 
 		//Remove the bookings
-		Vector<Booking> remove_bookings = bookings.RemoveBookingsCity(city2replace.ID(), matrix);
+		RemoveBookingsCity(city2replace.ID(), matrix);
 		
-		for(int i=0; i< remove_bookings.size();i++) {
-			Booking booking = remove_bookings.get(i);
-			
-			if(booking.From() == city2replace.ID()) {
-				//Booking was departing from removed city
-				for(int j = index;j<cities.size()-1;j++) {
-					//Decrease passengers in flight for that leg
-					//TODO: check j
-					SetPassengers(j, passengers.get(j)- booking.Pax());
-					if(booking.To()==cities.get(j+1).ID()) {
-						break;
-					}
-				}
-			}else {
-				//Booking was arriving in removed city
-				for(int j = index-1;j>=0;j--) {
-					//Decrease passengers in flight for that leg
-					//TODO: check j
-					if(passengers.get(j)- booking.Pax()< 0) {
-						System.out.println(j);
-						System.out.println(this.toString());
-						System.out.println(city2replace.toString());
-						System.out.println(booking.toString());
-						throw new RuntimeException("Joe");
-					}
-					
-					
-					SetPassengers(j, passengers.get(j)- booking.Pax());
-					if(booking.From()==cities.get(j).ID()) {
-						break;
-					}
-				}
-			}
-			
-			//Remove from profit these bookings
-			profit -= matrix.Distance(booking.From(), booking.To())*booking.Pax();
-		}
-
 		//Insert new city in cities vector
 		cities.set(index, city2insert);
 		//Newly calculate the distance vector
@@ -362,18 +365,13 @@ public class Route {
 			return false;
 		}
 		
-		
 		//Add Passenger & Bookings & update profit
-		int to_random_city_passengers = Math.min(MAX_PASSENGERS - passengers.get(index-1), matrix.Passengers(before.ID(), city2insert.ID()));
-		int from_random_city_passengers = Math.min(MAX_PASSENGERS - passengers.get(index), matrix.Passengers(city2insert.ID(), beyond.ID()));
-		SetPassengers(index-1, passengers.get(index-1)+ to_random_city_passengers);
-		SetPassengers(index, passengers.get(index)+ from_random_city_passengers);
-		bookings.AddBooking(new Booking(before.ID(), city2insert.ID(), to_random_city_passengers));
-		bookings.AddBooking(new Booking(city2insert.ID(), beyond.ID(), from_random_city_passengers));
-		profit+= matrix.Distance(before.ID(),city2insert.ID())*to_random_city_passengers;
-		profit+= matrix.Distance(city2insert.ID(),beyond.ID())*from_random_city_passengers;
-		matrix.UpdatePassengers(before.ID(), city2insert.ID(), -to_random_city_passengers);
-		matrix.UpdatePassengers(city2insert.ID(), beyond.ID(), -from_random_city_passengers);
+		int to_random_city_passengers = Math.min(MAX_PASSENGERS - passengers.get(index-1), 
+				matrix.Passengers(before.ID(), city2insert.ID()));
+		int from_random_city_passengers = Math.min(MAX_PASSENGERS - passengers.get(index), 
+				matrix.Passengers(city2insert.ID(), beyond.ID()));
+		AddBooking(before.ID(), city2insert.ID(), to_random_city_passengers, matrix);
+		AddBooking(city2insert.ID(), beyond.ID(), from_random_city_passengers, matrix);
 		return true;
 	}
 	
@@ -417,13 +415,10 @@ public class Route {
 		//Pick random flight leg
 		int index = rn.nextInt(cities.size()-1);
 		City departcity = cities.get(index);
-		int departcity_index = index;
 		City arrivalcity = cities.get(index+1);
 		
-
 		//Determine capacity left and available passengers
 		int free_capacity = MAX_PASSENGERS - passengers.get(index);
-		
 		//No room or passengers available thus return false
 		if(free_capacity==0) {
 			return false;
@@ -451,33 +446,9 @@ public class Route {
 		
 		//Determine the number of passengers to book
 		int extra_booked_passengers = Math.min(free_capacity, matrix.Passengers(departcity.ID(), arrivalcity.ID()));
-		
-		System.out.println(free_capacity);
-		
-		
-		for(int i=departcity_index;i<cities.size()-1;i++) {
-			if(passengers.get(i) + extra_booked_passengers> MAX_PASSENGERS) {
-				System.out.println(this.toString());
-				System.out.println(arrivalcity.toString());
-				System.out.println(departcity.toString());
-				System.out.println(free_capacity);
-				System.out.println(matrix.Passengers(departcity.ID(), arrivalcity.ID()));
-				System.out.println(passengers.get(i));
-				System.out.println(i);
-				
-				throw new RuntimeException("Route invalid");
-			}
-			SetPassengers(i, passengers.get(i) + extra_booked_passengers);
-			if(cities.get(i+1).ID() ==arrivalcity.ID()) {
-				break;
-			}
-		}
-		
+
 		//Add booking and update passenger matrix and passenger vector
-		bookings.AddBooking(new Booking(departcity.ID(), arrivalcity.ID(), extra_booked_passengers));
-		matrix.UpdatePassengers(departcity.ID(), arrivalcity.ID(), -extra_booked_passengers);
-		
-		profit += matrix.Distance(departcity.ID(), arrivalcity.ID())* extra_booked_passengers;  
+		AddBooking(departcity.ID(), arrivalcity.ID(), extra_booked_passengers, matrix);
 		
 		//Newly calculate the distance vector
 		double fly_time = this.SetNewDistances(matrix);
@@ -506,36 +477,25 @@ public class Route {
 		int city_index = rn.nextInt(cities.size()-3)+1;
 		City c1 = cities.get(city_index);
 		City c2 = cities.get(city_index+1);
-		//So City c1 and c2 are being swapped
-		
-		//Check for no neighbouring cities the same
-		if(cities.get(city_index-1).ID() == c1.ID() || c2.ID() == cities.get(city_index+2).ID()) {
-			return false;
-		}
-		
+
 		//Remove current booking and passengers
-		Booking booking = bookings.GetBooking(c1.ID(), c2.ID());
-		int booking_pax = 0;
-		if(booking!=null) {
-			bookings.RemoveBooking(c1.ID(), c2.ID());
-			profit-= matrix.Distance(c1.ID(),c2.ID())*booking.Pax();
-			matrix.UpdatePassengers(c1.ID(), c2.ID(), booking.Pax());
-			booking_pax = booking.Pax();
-		}
-		
-		//Set new passengers on flight
-		int free_capacity = MAX_PASSENGERS - (passengers.get(city_index) - booking_pax);
-		int available_passengers = matrix.Passengers(c1.ID(), c2.ID());
-		int new_direct_passengers = rn.nextInt(Math.min(available_passengers, free_capacity)+1);
-		SetPassengers(city_index, passengers.get(city_index) - booking_pax + new_direct_passengers);
-		//Set/Updates the booking for the new passengers
-		bookings.AddBooking(new Booking(c1.ID(),c2.ID(), new_direct_passengers));
-		profit+= matrix.Distance(c2.ID(),c1.ID())*new_direct_passengers;
-		matrix.UpdatePassengers(c1.ID(), c2.ID(), -new_direct_passengers);
+		RemoveBooking(c1.ID(), c2.ID(), matrix);
 		
 		//Swap cities in list
 		cities.set(city_index, c2);
 		cities.set(city_index+1, c1);
+
+		if(!PassengerSetByBookings()) {
+			//Not possible because city swapping leads to overcapacity on leg
+			return false;
+		}
+		
+		//Set new passengers on flight
+		int free_capacity = MAX_PASSENGERS -passengers.get(city_index);
+		int available_passengers = matrix.Passengers(c2.ID(), c1.ID());
+		int new_direct_passengers = rn.nextInt(Math.min(available_passengers, free_capacity)+1);
+		//Set/Updates the booking for the new passengers
+		AddBooking(c2.ID(),c1.ID(), new_direct_passengers, matrix);
 		
 		//Newly calculate the distance vector
 		double fly_time = this.SetNewDistances(matrix);
@@ -567,31 +527,29 @@ public class Route {
 		int city_index1=0;
 		int city_index2=0;
 		
-		for(int i=0;i< cities.size()-1;i++) {	
+		boolean found=false;
+		
+		for(int i=0;i< cities.size()-1 && (!found);i++) {	
 			if(cityid_from==cities.get(i).ID()) {
 				//Booking starting point found
-				
-				for(int j=i+1;j<cities.size();j++) {
-
+				for(int j=i+1;j<cities.size()&& (!found);j++) {
 					if(cityid_to == cities.get(j).ID()) {
 						//Found ending point
-						
 						if(i+1==j) {
 							//Booking has no detour
 							return false;
 						}else {
 							city_index1=i;
 							city_index2=j;
+							found=true;
+							break;
 						}
 					}
 				}
 			}
 		}
 		
-		//Remove detour booking and passengers
-		bookings.RemoveBooking(cityid_from, cityid_to);
-		profit-= matrix.Distance(cityid_from, cityid_to)*random_booking.Pax();
-		matrix.UpdatePassengers(cityid_from, cityid_to, random_booking.Pax());
+		RemoveBooking(cityid_from, cityid_to, matrix);
 		
 		//Between these two cities make new bookings with no detours
 		for(int i=city_index1;i<city_index2;i++) {
@@ -600,26 +558,14 @@ public class Route {
 			City c2=cities.get(i+1);
 			
 			//Check for capacity and available passengers on leg
-			int free_capacity = MAX_PASSENGERS - (passengers.get(i) - random_booking.Pax());
+			int free_capacity = MAX_PASSENGERS -passengers.get(i);
 			
 			int available_passengers = matrix.Passengers(c1.ID(), c2.ID());
-			
-			System.out.println(free_capacity);
-			
+
 			//Update the new passengers
 			int new_direct_passengers = rn.nextInt(Math.min(available_passengers, free_capacity)+1);
-			SetPassengers(i, passengers.get(i) - random_booking.Pax() + new_direct_passengers);
 			
-			if( passengers.get(i)<0) {
-				System.out.println(this.toString());
-				System.out.println(c1.toString());
-				System.out.println(c2.toString());
-				System.out.println(random_booking.toString());
-				System.out.println(passengers.get(i));
-				System.out.println(new_direct_passengers);
-				throw new RuntimeException("Free");
-			}
-			
+
 			//Set/Updates the booking for the new passengers
 			Booking b = bookings.GetBooking(c1.ID(),c2.ID());
 			
@@ -635,12 +581,16 @@ public class Route {
 				}
 			}
 			
-			System.out.println();
-			
-			bookings.AddBooking(new Booking(c1.ID(),c2.ID(), new_direct_passengers));
-			profit+= matrix.Distance(c1.ID(), c2.ID())*new_direct_passengers;
-			matrix.UpdatePassengers(c1.ID(), c2.ID(), -new_direct_passengers);
+			AddBooking(c1.ID(),c2.ID(), new_direct_passengers, matrix);
 		}
+		
+		//Remove detour booking and passengers
+		if(null!=bookings.GetBooking(cityid_from, cityid_to)) {
+			
+			System.out.println(cityid_from);
+			System.out.println(cityid_to);
+			throw new RuntimeException("weierd");
+		};
 
 		return true;
 	}
