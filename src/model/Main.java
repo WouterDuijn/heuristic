@@ -37,7 +37,7 @@ public class Main {
 		// or if X number of iterations reached, stop?
 			
 		// create 5 initial random schedules
-		for(int i = 0; i<5; i++) {
+		for(int i = 0; i<10; i++) {
 			Matrix m = new Matrix(matrix);
 			schedules.add(RandomModel(cities, m));
 		}
@@ -173,6 +173,15 @@ public class Main {
 		//visualizeSchedule(schedule);
 		
 		out.println("Running the hill climbing model");
+		
+		/*int x=0;
+		for(int i=1; i<cities.size(); i++) {
+			Schedule schedule = HillClimbingModel(cities, matrix, cities.getID(i));
+			if(schedule.Profit()>optimal_schedule.Profit()){
+				optimal_schedule=new Schedule(schedule);
+				x=i;
+			}
+		}*/
 		Schedule optimal_schedule = HillClimbingModel(cities, matrix);
 		printSchedule(optimal_schedule);
 		visualizeSchedule(optimal_schedule);

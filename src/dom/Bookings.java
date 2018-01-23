@@ -32,7 +32,8 @@ public class Bookings {
 	}
 	
 	public Booking RandomBooking(Random rn) {
-		int random_booking_key = (int) bookings.keySet().toArray()[rn.nextInt(bookings.size()-1)];
+		int random_booking_key = (Integer) bookings.keySet().toArray()[rn.nextInt(bookings.size()-1)];
+		//int random_booking_key = (int) bookings.keySet().toArray()[rn.nextInt(bookings.size()-1)];
 		return bookings.get(random_booking_key);
 	}
 	

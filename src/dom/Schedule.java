@@ -7,6 +7,7 @@ public class Schedule {
 	
 	private Vector<Route> routes;
 	private Matrix matrix;
+	private City homeBase;
 	
 	public Schedule(Schedule schedule) {
 		
@@ -19,11 +20,13 @@ public class Schedule {
 		
 		
 		this.matrix = new Matrix(schedule.matrix);
+		this.homeBase = schedule.homeBase;
 	}
 	
 	public Schedule(Matrix matrix){
 		this.routes = new Vector<Route>();
 		this.matrix = new Matrix(matrix);
+		//this.homeBase = new City();
 	}
 	
 	public void AddRoute(Route route) {
