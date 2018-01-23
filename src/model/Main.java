@@ -15,9 +15,6 @@ import java.util.Random;
 
 public class Main {
 
-	public static final int NR_PLANES = 6;
-	public static final String INPUT_PATH = "C:\\workspace\\heuristic\\inp\\";
-
 	//tests
 	PrintStream out;
 	Random rn;
@@ -209,7 +206,7 @@ public class Main {
 
 	Schedule RandomModel(Cities cities, Matrix inputMatrix) {
 		Schedule schedule = new Schedule(inputMatrix);
-		for(int k=0; k<NR_PLANES;k++) {
+		for(int k=0; k<Schedule.NR_PLANES;k++) {
 			Route optimalRoute =new Route();
 			for(int j = 0; j<100; j++){ // create 10000 routes to find best
 
@@ -285,7 +282,7 @@ public class Main {
 	void start() {
 		//Parse
 		System.out.println("Parsing the input data");
-		Parser parser = new Parser(INPUT_PATH);
+		Parser parser = new Parser();
 		Cities cities = parser.ParseCities();
 		Matrix matrix = parser.ParseMatrices(cities.size());
 

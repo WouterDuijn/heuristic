@@ -69,4 +69,14 @@ public class Matrix {
 		
 		return result;
 	}
+	
+	public int TotalPassengers() {
+		int result=0;
+		for(int i=0;i<passengers.length;i++) {
+			for(int j=0;j<passengers.length;j++) {
+				result += passengers[i][j];
+			}
+		}
+		return result;
+	}
 }
