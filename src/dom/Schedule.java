@@ -5,19 +5,17 @@ import java.util.Vector;
 
 public class Schedule {
 	
+	public static final int NR_PLANES=6;
 	private Vector<Route> routes;
 	private Matrix matrix;
 	
 	public Schedule(Schedule schedule) {
-		
 		this.routes = new Vector<Route>();
 		for(int i=0;i<schedule.routes.size();i++) {
 			this.routes.add(new Route(schedule.routes.get(i)));
 		}
 		
 		//this.routes = new Vector<Route>(schedule.routes);
-		
-		
 		this.matrix = new Matrix(schedule.matrix);
 	}
 	
@@ -66,5 +64,13 @@ public class Schedule {
 		for(Route r: routes) {
 			r.CheckValidity();
 		}
+	}
+	
+	public int TotalPassengersBooked() {
+		int result=0;
+		for(Route r : routes) {
+			result += r.TotalPassengersBooked();
+		}
+		return result;
 	}
 }

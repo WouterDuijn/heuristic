@@ -10,13 +10,11 @@ public class Parser {
 	private static final String CITIES_FILE_NAME = "MokumAirwaysCities.txt";
 	private static final String DISTANCES_FILE_NAME = "MokumAirwaysDistances.txt";
 	private static final String PASSENGERS_FILE_NAME = "MokumAirwaysPassengers.txt";
+	public static final String INPUT_PATH = "C:\\workspace\\heuristic\\inp\\";
 			
-	private String input_path;
 	PrintStream out;
 	
-	public Parser(String input_path){
-		this.input_path = input_path;
-		
+	public Parser(){
 		out = new PrintStream(System.out);
 	}
 	
@@ -25,7 +23,7 @@ public class Parser {
 		Cities cities =new Cities();
 		
 		//Parse the input data here
-		File file = new File(input_path+CITIES_FILE_NAME);
+		File file = new File(INPUT_PATH+CITIES_FILE_NAME);
 		try {
 			Scanner in = new Scanner(file);
 			//Skip first three header lines
@@ -65,7 +63,7 @@ public class Parser {
 		
 		
 		//Parse the input distances data here
-		File file = new File(input_path+DISTANCES_FILE_NAME);
+		File file = new File(INPUT_PATH+DISTANCES_FILE_NAME);
 		try {
 			Scanner in = new Scanner(file);
 			
@@ -99,7 +97,7 @@ public class Parser {
 		
 		
 		//Parse passenger matrix
-		File file2 = new File(input_path+PASSENGERS_FILE_NAME);
+		File file2 = new File(INPUT_PATH+PASSENGERS_FILE_NAME);
 		try {
 			Scanner in = new Scanner(file2);
 			

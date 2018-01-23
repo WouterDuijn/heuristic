@@ -93,7 +93,8 @@ public class Bookings {
 		Enumeration<Integer> enumKey = bookings.keys();
 		while(enumKey.hasMoreElements()) {
 		    Booking booking = bookings.get(enumKey.nextElement());
-		    clone.put(booking.Hash(), booking);
+		    Booking new_booking = new Booking(booking);
+		    clone.put(new_booking.Hash(), new_booking);
 		}
 		return clone;
 	}

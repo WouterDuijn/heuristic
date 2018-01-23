@@ -179,15 +179,13 @@ public class Route {
 				"Time\t" + this.current_time + "\n" + "Profit\t" + this.profit + "\n";
 	}
 
-	private void AddBooking(int cityid_from, int cityid_to, int nr_passengers, Matrix matrix) {
+	private boolean AddBooking(int cityid_from, int cityid_to, int nr_passengers, Matrix matrix) {
 		if(nr_passengers>0) {
 			bookings.AddBooking(new Booking(cityid_from, cityid_to, nr_passengers));
 			matrix.UpdatePassengers(cityid_from, cityid_to, -nr_passengers);
 			profit+=matrix.Distance(cityid_from, cityid_to)*nr_passengers;
-			
-			
 		}
-		PassengerSetByBookings();
+		return PassengerSetByBookings();
 		
 	}
 	
@@ -195,7 +193,7 @@ public class Route {
 		Booking b = bookings.RemoveBooking(city1, city2);
 		if(b!=null) {
 			matrix.UpdatePassengers(b.From(), b.To(), b.Pax());
-			profit-=matrix.Distance(city1, city1)*b.Pax();
+			profit-=matrix.Distance(city1, city2)*b.Pax();
 		}
 		
 		PassengerSetByBookings();
@@ -238,6 +236,7 @@ public class Route {
 				if(passengers.get(i) + b.Pax()>MAX_PASSENGERS) {
 					return false;
 				}
+				
 				passengers.set(i, passengers.get(i) + b.Pax());
 				
 			}
@@ -593,5 +592,13 @@ public class Route {
 		};
 
 		return true;
+	}
+
+	public Bookings Bookings() {
+		return bookings;
+	}
+	
+	public int TotalPassengersBooked() {
+		return bookings.TotalBookedPax();
 	}
 }

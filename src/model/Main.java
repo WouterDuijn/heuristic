@@ -15,10 +15,9 @@ import java.util.Random;
 
 public class Main {
 
-	public static final int NR_PLANES = 6;
-	public static final String INPUT_PATH = "C:\\workspace\\heuristic\\inp\\";
+	public static final int NR_RUNS=5;
+	public static final int NR_MUTATIONS_PER_RUN=10000;
 
-	//tests
 	PrintStream out;
 	Random rn;
 
@@ -37,36 +36,42 @@ public class Main {
 		// or if X number of iterations reached, stop?
 			
 		// create 5 initial random schedules
-		for(int i = 0; i<5; i++) {
+		for(int i = 0; i<NR_RUNS; i++) {
 			Matrix m = new Matrix(matrix);
 			schedules.add(RandomModel(cities, m));
 		}
 		
-		for(int k =0;k<schedules.size();k++) {
+		for(int i =0;i<NR_RUNS;i++) {
 			// Hill climbing algorithm (run all 5 schedules to find 5 local optima)
-			Schedule current_schedule = new Schedule(schedules.get(k));
+			Schedule current_schedule = new Schedule(schedules.get(i));
 			
 			
 			//TODO: Determine stop criteria. Now hardcoded to 100.000 mutations
-			for(int j=0;j< 100000;j++) {
+			for(int j=0;j< NR_MUTATIONS_PER_RUN;j++) {
 				Schedule s = new Schedule(current_schedule);
 				if(s.Mutate(rn, cities) && s.Profit()>current_schedule.Profit()) {
 					s.CheckValidity();
 					current_schedule = new Schedule(s);
 				}
+				
 			}
 			optimal_schedules.add(current_schedule);
 		}
 		
+		//Find out best schedule of the x runs
 		Schedule best = new Schedule(optimal_schedules.get(0));
-		
 		for(Schedule s: optimal_schedules) {
 			if(s.Profit()>best.Profit()) {
 				best = new Schedule(s);
 			}
 			
 		}
-
+		
+		//Check if the initially available passengers are same as booked passengers and remaining passengers
+		if(best.Matrix().TotalPassengers() + best.TotalPassengersBooked() != matrix.TotalPassengers()) {
+			throw new RuntimeException("Schedule passengers and available passengers are not in line.");
+		}
+	
 		return best;
 	}
 	
@@ -81,7 +86,7 @@ public class Main {
 
 	Schedule RandomModel(Cities cities, Matrix inputMatrix) {
 		Schedule schedule = new Schedule(inputMatrix);
-		for(int k=0; k<NR_PLANES;k++) {
+		for(int k=0; k<Schedule.NR_PLANES;k++) {
 			Route optimalRoute =new Route();
 			for(int j = 0; j<100; j++){ // create 10000 routes to find best
 
@@ -161,12 +166,12 @@ public class Main {
 	void start() {
 		//Parse
 		System.out.println("Parsing the input data");
-		Parser parser = new Parser(INPUT_PATH);
+		Parser parser = new Parser();
 		Cities cities = parser.ParseCities();
 		Matrix matrix = parser.ParseMatrices(cities.size());
 
 		//Random Model
-		System.out.println("Running the random model");
+		//System.out.println("Running the random model");
 		//Route route = RandomModel(cities, matrix);
 		//Schedule schedule = RandomModel(cities, matrix);
 		//printSchedule(schedule);
@@ -176,8 +181,6 @@ public class Main {
 		Schedule optimal_schedule = HillClimbingModel(cities, matrix);
 		printSchedule(optimal_schedule);
 		visualizeSchedule(optimal_schedule);
-		
-		
 
 	}
 
