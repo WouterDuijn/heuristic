@@ -427,7 +427,7 @@ public class Route {
 		//Search for arrivalcity with available passengers
 		while(matrix.Passengers(departcity.ID(),arrivalcity.ID())==0) {
 			index++;
-			if(index+1==cities.size()) {
+			if(index+1==cities.size()) { // city at index is final destination
 				//Every possible departure city has no passengers available from departure city (always including detours)
 				return false;
 			}
@@ -541,7 +541,7 @@ public class Route {
 							city_index1=i;
 							city_index2=j;
 							found=true;
-							break;
+							break; // why break if for-loop already stops when found is true?
 						}
 					}
 				}
