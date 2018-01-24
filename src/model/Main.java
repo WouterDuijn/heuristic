@@ -18,7 +18,7 @@ import java.io.IOException;
 
 public class Main {
 
-	public static final int 	NUM_INITIAL_SCHEDULES = 20,
+	public static final int 	NUM_INITIAL_SCHEDULES = 25,
 								NUM_RANDOM_ROUTES = 1000,
 								NO_IMPROVEMENT_ITERATIONS = 10000;
 
@@ -180,8 +180,6 @@ public class Main {
 						// keep track of best schedule
 						if(current_schedule.Profit() > best_schedule.Profit()) {
 							best_schedule = new Schedule(current_schedule);
-							// volgens mij kan dit ook zo:
-							// best_schedule = current_schedule (laat reference pointen naar een al bestaand object)
 						}
 						temp *= 1 - COOLING_RATE;	
 					}			
@@ -544,7 +542,9 @@ public class Main {
 
 		// To find better values of temperature and cooling rate
 		// this randomModel so we compare temp and rate with the same sequence of random numbers
-		SimulatedAnnealing2(cities, matrix); // op een of andere manier zijn de profits heel laag..
+		for(int i=0;i<100;i++) {
+			SimulatedAnnealing2(cities, matrix); // op een of andere manier zijn de profits heel laag..
+		}
 
 		//plot
 	}

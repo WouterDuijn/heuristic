@@ -539,6 +539,10 @@ public class Route {
 	 */
 	private boolean SwapDetour(Random rn, Matrix matrix) {
 		//Pick random booking
+		if(bookings.size()==1) {
+			return false;
+		}
+
 		Booking random_booking = bookings.RandomBooking(rn);
 		
 		int cityid_from = random_booking.From();
