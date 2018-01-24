@@ -22,7 +22,7 @@ public class Main {
 								NUM_RANDOM_ROUTES = 1000,
 								NO_IMPROVEMENT_ITERATIONS = 10000;
 
-	public static final double	COOLING_RATE = 0.005,
+	public static final double	COOLING_RATE = 0.01,
 								MIN_PROFIT_IMPROVEMENT = 0;
 
 	public static final long 	SEED = 441287210;
@@ -140,7 +140,7 @@ public class Main {
 				// TODO: find good values for number and the constant RATE
 				// TODO: plot temperature (y) versus number of mutations??
 				// TODO: plot profit (y) against number of mutations (x)
-				double temp = 10000;
+				double temp = 3000000;
 				String filename = "C:\\workspace\\heuristic\\SimulatedAnnealing\\Schedule_" 
 				+ (k+1) + "_Temp_" + temp +"_CR_" + COOLING_RATE + ".txt";
 				filewriters.add(new FileWriter(new File(filename)));
@@ -516,21 +516,21 @@ public class Main {
 		Matrix matrix = parser.ParseMatrices(cities.size());
 
 		//Random Model
-		//		System.out.println("Running the random model");
-		//		Schedule schedule = RandomModel(cities, matrix);
-		//		printSchedule(schedule);
+		//System.out.println("Running the random model");
+		//Schedule schedule = RandomModel(cities, matrix);
+		//printSchedule(schedule);
 		//visualizeSchedule(schedule);
 
 		//Hill climbing model with restart
-		//		out.println("Running the hill climbing model with restart");
-		//		Schedule optimal_schedule = HillClimberRestartModel(cities, matrix);
-		//		printSchedule(optimal_schedule);
+		//out.println("Running the hill climbing model with restart");
+		//Schedule optimal_schedule = HillClimberRestartModel(cities, matrix);
+		//printSchedule(optimal_schedule);
 		//visualizeSchedule(optimal_schedule);
 
 		//Hill climbing model (simulated annealing)
-		//		out.println("Running the hill climbing model (simulated annealing)");
-		//		Schedule optimal = SimulatedAnnealing(cities, matrix);
-		//		printSchedule(optimal);
+		out.println("Running the hill climbing model (simulated annealing)");
+		Schedule optimal = SimulatedAnnealing(cities, matrix);
+		printSchedule(optimal);
 		//visualizeSchedule(optimal);
 
 		//Advanced questions: which hometown is best?
@@ -541,16 +541,14 @@ public class Main {
 //		out.printf("The profit corresponding to the schedule is €%f", best_hometown_schedule.Profit());
 
 		// To find better values of temperature and cooling rate
-		// this randomModel so we compare temp and rate with the same sequence of random numbers
-		for(int i=0;i<100;i++) {
-			SimulatedAnnealing2(cities, matrix); // op een of andere manier zijn de profits heel laag..
-		}
-
-		//plot
+		// this randomModel so we compare temp and rate with the same sequence of random numbers		
+		//out.println("Writing the profit after mutations data to textfiles...");
+		//SimulatedAnnealing2(cities, matrix); // op een of andere manier zijn de profits heel laag..
+		
+		//plots in R
 	}
 
 	public static void main(String[] argv) {
-
 		new Main().start();
 
 	}
