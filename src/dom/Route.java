@@ -22,6 +22,8 @@ public class Route {
 	Vector<Double> distances;
 	private Bookings bookings;
 	
+	private int hometownID;
+	
 	/**
 	 * Default Constructor. Set current time and profit to zero
 	 */
@@ -33,9 +35,19 @@ public class Route {
 		tank = new Vector<Double>();
 		current_time=0;
 		profit=0;
+		this.hometownID = 0; // temporarily added
 	}
 	
-	
+	public Route(int hometownID){
+		setCities(new Vector<City>());
+		setPassengers(new Vector<Integer>());
+		distances = new Vector<Double>();
+		bookings = new Bookings();
+		tank = new Vector<Double>();
+		current_time=0;
+		profit=0;
+		this.hometownID = hometownID;
+	}
 	/**
 	 * Copy constructor of route
 	 * @param route = route to be copied from
@@ -48,6 +60,7 @@ public class Route {
 		this.bookings = new Bookings(route.bookings);
 		this.current_time=route.current_time;
 		this.profit = route.profit;
+		this.hometownID = route.hometownID; // temporarily added
 	}
 	
 	
@@ -66,8 +79,17 @@ public class Route {
 		current_time=0;
 		profit=0;
 		out = new PrintStream(System.out);
+		// if this constructor is called, setHomeTownID needs to be called to set hometown! TEMPORARILY
 	}
 
+	public void setHomeTownID(int id) {
+		this.hometownID=id;
+	}
+	
+	public int hometownID() {
+		return this.hometownID;
+	}
+	
 	public int size(){
 		return cities.size();
 	}
@@ -309,12 +331,11 @@ public class Route {
 			return NewCity(rn, matrix, cities_list);
 		}
 		return false;
-	}
-	
+	}	
 	
 	private boolean NewCity(Random rn, Matrix matrix, Cities cities_list) {
 		int index = rn.nextInt(cities.size()-2)+1;
-		while(cities.get(index).ID()==0) {
+		while(cities.get(index).ID()==hometownID) { // ==0
 			index = rn.nextInt(cities.size()-2)+1;
 		}
 		
@@ -334,7 +355,7 @@ public class Route {
 		
 		//Check for non Amsterdam as well
 		while(before.ID() == city2insert.ID() || beyond.ID() == city2insert.ID() ||
-				city2insert.ID() == 0 || occurence>0) {
+				city2insert.ID() == hometownID || occurence>0) { // city2insert.ID() == 0
 			//Search for new city without equal neighbours
 			city2insert = cities_list.getCity(rn.nextInt(cities_list.size()));
 			
