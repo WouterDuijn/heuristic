@@ -15,6 +15,12 @@ import java.util.Random;
 
 public class Main {
 
+	public static final int 	NUM_INITIAL_SCHEDULES = 20,
+								NO_IMPROVEMENT_ITERATIONS = 10000;
+	
+	public static final double	RATE = 0.003,
+								MIN_PROFIT_IMPROVEMENT = 0;
+	
 	//tests
 	PrintStream out;
 	Random rn;
@@ -27,11 +33,11 @@ public class Main {
 	
 	//TODO: change name 'number' 
 	double acceptanceProbability(double current_profit, double new_profit, double number) {
-		// if current (new) solution is better, accept it
+		// if new solution is better, accept it with prob. 1
 		if(new_profit > current_profit) {
 			return 1.0;
 		}
-		// if current (new) solution is worse, calculate acceptance probability
+		// if new solution is worse, calculate acceptance probability
 		return Math.exp(new_profit-current_profit/number);
 	}
 	
@@ -44,57 +50,43 @@ public class Main {
 		Vector<Schedule> schedules = new Vector<Schedule>();
 		Vector<Schedule> optimal_schedules = new Vector<Schedule>();
 		
-		// create 5 initial random schedules
-		for(int i = 0; i<10; i++) {
+		// create NUM_INITIAL_SCHEDULES initial random schedules
+		for(int i = 0; i<NUM_INITIAL_SCHEDULES; i++) {
 			Matrix m = new Matrix(matrix);
 			schedules.add(RandomModel(cities, m));
-//			out.printf("Schedule: %d\n", i+1);
-//			out.printf("Profit random schedule: €%f\n", schedules.get(i).Profit());
 		}
 
 		for(int k =0;k<schedules.size();k++) {
-			// Hill climbing algorithm (run all 5 schedules to find 5 local optima)
+			// Hill climbing algorithm (run all initial schedules to find the local optima)
 			Schedule current_schedule = new Schedule(schedules.get(k));
-//			out.printf("Schedule: %d\n", k+1);
-//			out.printf("Profit current schedule bef. mut.: €%f\n", current_schedule.Profit());
 			Schedule best_schedule = new Schedule(current_schedule); 
-//			out.printf("Schedule: %d\n", k+1);
-//			out.printf("Profit best schedule bef. mut.: €%f\n", best_schedule.Profit());
 			
-			double number = 100000;
-			double profitRate = 0.0005;
-			
-			//Schedule current_schedule = new Schedule(schedules.get(k));
-			//out.printf("Schedule: %d\n", k+1);
-			//out.printf("Profit without mutations: €%f\n", current_schedule.Profit());
+			// TODO: find good values for number and the constant RATE
+			double number = 300000;
 			
 			int num_mutations = 0;
 			int tries = 0;
-		
+			
 			while(number>1) {
 				tries++;
 				Schedule newSchedule = new Schedule(current_schedule);
-//				out.printf("Schedule: %d\n", k+1);
-//				out.printf("Profit newSchedule bef. mut.: €%f\n", newSchedule.Profit());
+
 				if(newSchedule.Mutate(rn, cities)) {
 					newSchedule.CheckValidity();
 					num_mutations++;
-					// TODO: print to text file and create graph
+					// TODO: print to text file and/or create graph
 					//out.printf("Mutation: %d, profit: €%f\n", num_mutations, newSchedule.Profit());
 					
 					double randomNumber = randomDouble();
 					if(acceptanceProbability(newSchedule.Profit(), current_schedule.Profit(), number) > randomNumber) {
 						current_schedule = new Schedule(newSchedule);
-//						out.printf("Schedule: %d\n", k+1);
-//						out.printf("Profit current schedule aft. mut.: €%f\n", current_schedule.Profit());
 					}
 					
+					// keep track of best schedule
 					if(current_schedule.Profit() > best_schedule.Profit()) {
 						best_schedule = new Schedule(current_schedule);
-//						out.printf("Schedule: %d\n", k+1);
-//						out.printf("Profit best schedule aft. mut.: €%f\n", best_schedule.Profit());
 					}
-					number *= 1 - profitRate;	
+					number *= 1 - RATE;	
 				}			
 			}
 
@@ -114,30 +106,25 @@ public class Main {
 		return best;
 	}
 	
-	// moeten hier deep copies gemaakt worden van de Schedules of kan het zo?
 	Schedule HillClimberRestartModel(Cities cities, Matrix matrix) { // boolean restart, of geen restart
-		//boolean cont = true;
+
 		Vector<Schedule> schedules = new Vector<Schedule>();
 		Vector<Schedule> optimal_schedules = new Vector<Schedule>();
-		double profit_improvement = 0; // if diff between optimal and current profit <= 10, stop?
-		// or if X number of iterations reached, stop?
-		// profit_improvement may be larger than 0. 
 		
-		// create 5 initial random schedules
-		for(int i = 0; i<50; i++) {
+		// create NUM_INITIAL_SCHEDULES initial random schedules
+		for(int i = 0; i<NUM_INITIAL_SCHEDULES; i++) {
 			Matrix m = new Matrix(matrix);
 			schedules.add(RandomModel(cities, m));
 		}
 
 		for(int k =0;k<schedules.size();k++) {
-			// Hill climbing algorithm (run all 5 schedules to find 5 local optima)
+			// Hill climbing algorithm (run all initial schedules to find the local optima)
 			Schedule current_schedule = new Schedule(schedules.get(k));
 			out.printf("Schedule: %d\n", k+1);
 			
 			int num_mutations = 0;
 			int tries = 0;
 			int no_improvement_iterations = 0;
-			//TODO: Determine stop criteria. Now hardcoded to 100.000 mutations
 			
 			Schedule s = new Schedule(current_schedule);
 			if(s.Mutate(rn, cities)) {
@@ -149,23 +136,26 @@ public class Main {
 					current_schedule = new Schedule(s); // x-as is teller hoe veel succesvolle mutates
 				}
 			}
-			while(s.Profit()-current_schedule.Profit()>profit_improvement || no_improvement_iterations<10000) {
+			// if newly found profit - best_profit < MIN_PROFIT_IMPROVEMENT (barely any improvement) 
+			// for NO_IMPROVEMENT_ITERATIONS iterations, stop searching for a better solution
+			while(s.Profit()-current_schedule.Profit()>MIN_PROFIT_IMPROVEMENT || no_improvement_iterations<NO_IMPROVEMENT_ITERATIONS) {
 				tries++;
 				s = new Schedule(current_schedule);
 				if(s.Mutate(rn, cities)) {
 					s.CheckValidity();
 					num_mutations++;
-					// TODO: print to text file and create graph
+					// TODO: print to text file and/or create graph
 					//out.printf("Mutation: %d, profit: €%f\n", num_mutations, s.Profit());
 					if(s.Profit()>current_schedule.Profit()) { // als mutate succesvol, print statement voor grafiek
 						current_schedule = new Schedule(s); // x-as is teller hoe veel succesvolle mutates
 						no_improvement_iterations=0;
 					}
-					if(s.Profit() - current_schedule.Profit() < profit_improvement) {
+					if(s.Profit() - current_schedule.Profit() < MIN_PROFIT_IMPROVEMENT) {
 						no_improvement_iterations++;
 					}
 				}
 			}
+			//TODO: Determine stop criteria. Now hardcoded to 100.000 mutations
 /*			for(int j=0;j< 100000;j++) {
 				Schedule s = new Schedule(current_schedule);
 				if(s.Mutate(rn, cities)) {
@@ -194,7 +184,6 @@ public class Main {
 		return best;
 	}
 
-	// added printing method so RandomModel wouldn't print when used in HillClimbingModel
 	void printSchedule(Schedule schedule) {
 		for(int i=0; i<schedule.Routes().size(); i++) {
 			out.printf(schedule.Routes().get(i).toString());
@@ -205,9 +194,10 @@ public class Main {
 
 	Schedule RandomModel(Cities cities, Matrix inputMatrix) {
 		Schedule schedule = new Schedule(inputMatrix);
+		
 		for(int k=0; k<Schedule.NR_PLANES;k++) {
 			Route optimalRoute =new Route();
-			for(int j = 0; j<100; j++){ // create 10000 routes to find best
+			for(int j = 0; j<1000; j++){ // create multiple routes to find best
 
 				int randomStartCity = rn.nextInt(cities.size());
 				Route route = new Route(cities.getCity(randomStartCity));
@@ -286,22 +276,21 @@ public class Main {
 		Matrix matrix = parser.ParseMatrices(cities.size());
 
 		//Random Model
-		//System.out.println("Running the random model");
-		//Route route = RandomModel(cities, matrix);
-		//Schedule schedule = RandomModel(cities, matrix);
-		//printSchedule(schedule);
+//		System.out.println("Running the random model");
+//		Schedule schedule = RandomModel(cities, matrix);
+//		printSchedule(schedule);
 		//visualizeSchedule(schedule);
 
 		//Hill climbing model with restart
-		//out.println("Running the hill climbing model with restart");
-		//Schedule optimal_schedule = HillClimberRestartModel(cities, matrix);
-		//printSchedule(optimal_schedule);
+		out.println("Running the hill climbing model with restart");
+		Schedule optimal_schedule = HillClimberRestartModel(cities, matrix);
+		printSchedule(optimal_schedule);
 		//visualizeSchedule(optimal_schedule);
 		
 		//Hill climbing model (simulated annealing)
-		out.println("Running the hill climbing model (simulated annealing)");
-		Schedule optimal = HillClimberSimulatedAnnealing(cities, matrix);
-		printSchedule(optimal);
+//		out.println("Running the hill climbing model (simulated annealing)");
+//		Schedule optimal = HillClimberSimulatedAnnealing(cities, matrix);
+//		printSchedule(optimal);
 		//visualizeSchedule(optimal);
 	}
 
