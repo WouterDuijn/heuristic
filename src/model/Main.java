@@ -18,7 +18,7 @@ public class Main {
 	public static final int 	NUM_INITIAL_SCHEDULES = 20,
 								NO_IMPROVEMENT_ITERATIONS = 10000;
 	
-	public static final double	RATE = 0.003,
+	public static final double	COOLING_RATE = 0.005,
 								MIN_PROFIT_IMPROVEMENT = 0;
 	
 	//tests
@@ -31,14 +31,13 @@ public class Main {
 		rn = new Random();
 	}
 	
-	//TODO: change name 'number' 
-	double acceptanceProbability(double current_profit, double new_profit, double number) {
+	double acceptanceProbability(double current_profit, double new_profit, double temperature) {
 		// if new solution is better, accept it with prob. 1
 		if(new_profit > current_profit) {
 			return 1.0;
 		}
 		// if new solution is worse, calculate acceptance probability
-		return Math.exp(new_profit-current_profit/number);
+		return Math.exp(new_profit-current_profit/temperature);
 	}
 	
 	double randomDouble() {
@@ -46,7 +45,7 @@ public class Main {
 		return r.nextInt(1000)/1000.0;
 	}
 	
-	Schedule HillClimberSimulatedAnnealing(Cities cities, Matrix matrix) {
+	Schedule SimulatedAnnealing(Cities cities, Matrix matrix) {
 		Vector<Schedule> schedules = new Vector<Schedule>();
 		Vector<Schedule> optimal_schedules = new Vector<Schedule>();
 		
@@ -62,12 +61,12 @@ public class Main {
 			Schedule best_schedule = new Schedule(current_schedule); 
 			
 			// TODO: find good values for number and the constant RATE
-			double number = 300000;
+			double temp = 10000;
 			
 			int num_mutations = 0;
 			int tries = 0;
 			
-			while(number>1) {
+			while(temp>1) {
 				tries++;
 				Schedule newSchedule = new Schedule(current_schedule);
 
@@ -78,7 +77,7 @@ public class Main {
 					//out.printf("Mutation: %d, profit: €%f\n", num_mutations, newSchedule.Profit());
 					
 					double randomNumber = randomDouble();
-					if(acceptanceProbability(newSchedule.Profit(), current_schedule.Profit(), number) > randomNumber) {
+					if(acceptanceProbability(newSchedule.Profit(), current_schedule.Profit(), temp) > randomNumber) {
 						current_schedule = new Schedule(newSchedule);
 					}
 					
@@ -86,7 +85,7 @@ public class Main {
 					if(current_schedule.Profit() > best_schedule.Profit()) {
 						best_schedule = new Schedule(current_schedule);
 					}
-					number *= 1 - RATE;	
+					temp *= 1 - COOLING_RATE;	
 				}			
 			}
 
@@ -106,7 +105,7 @@ public class Main {
 		return best;
 	}
 	
-	Schedule HillClimberRestartModel(Cities cities, Matrix matrix) { // boolean restart, of geen restart
+	Schedule HillClimberRestartModel(Cities cities, Matrix matrix) { 
 
 		Vector<Schedule> schedules = new Vector<Schedule>();
 		Vector<Schedule> optimal_schedules = new Vector<Schedule>();
@@ -197,7 +196,7 @@ public class Main {
 		
 		for(int k=0; k<Schedule.NR_PLANES;k++) {
 			Route optimalRoute =new Route();
-			for(int j = 0; j<100; j++){ // create multiple routes to find best
+			for(int j = 0; j<1000; j++){ // create multiple routes to find best
 
 				int randomStartCity = rn.nextInt(cities.size());
 				Route route = new Route(cities.getCity(randomStartCity));
@@ -289,7 +288,7 @@ public class Main {
 		
 		//Hill climbing model (simulated annealing)
 		out.println("Running the hill climbing model (simulated annealing)");
-		Schedule optimal = HillClimberSimulatedAnnealing(cities, matrix);
+		Schedule optimal = SimulatedAnnealing(cities, matrix);
 		printSchedule(optimal);
 		//visualizeSchedule(optimal);
 	}
