@@ -45,14 +45,14 @@ public class Main {
 		Vector<Schedule> optimal_schedules = new Vector<Schedule>();
 		
 		// create 5 initial random schedules
-		for(int i = 0; i<5; i++) {
+		for(int i = 0; i<10; i++) {
 			Matrix m = new Matrix(matrix);
 			schedules.add(RandomModel(cities, m));
 //			out.printf("Schedule: %d\n", i+1);
 //			out.printf("Profit random schedule: €%f\n", schedules.get(i).Profit());
 		}
 
-		for(int k =0;k<schedules.size()-3;k++) {
+		for(int k =0;k<schedules.size();k++) {
 			// Hill climbing algorithm (run all 5 schedules to find 5 local optima)
 			Schedule current_schedule = new Schedule(schedules.get(k));
 //			out.printf("Schedule: %d\n", k+1);
@@ -61,8 +61,8 @@ public class Main {
 //			out.printf("Schedule: %d\n", k+1);
 //			out.printf("Profit best schedule bef. mut.: €%f\n", best_schedule.Profit());
 			
-			double number = 10000;
-			double profitRate = 0.005;
+			double number = 100000;
+			double profitRate = 0.0005;
 			
 			//Schedule current_schedule = new Schedule(schedules.get(k));
 			//out.printf("Schedule: %d\n", k+1);
@@ -71,7 +71,6 @@ public class Main {
 			int num_mutations = 0;
 			int tries = 0;
 		
-			
 			while(number>1) {
 				tries++;
 				Schedule newSchedule = new Schedule(current_schedule);
@@ -125,7 +124,7 @@ public class Main {
 		// profit_improvement may be larger than 0. 
 		
 		// create 5 initial random schedules
-		for(int i = 0; i<5; i++) {
+		for(int i = 0; i<50; i++) {
 			Matrix m = new Matrix(matrix);
 			schedules.add(RandomModel(cities, m));
 		}
@@ -294,15 +293,15 @@ public class Main {
 		//visualizeSchedule(schedule);
 
 		//Hill climbing model with restart
-		out.println("Running the hill climbing model with restart");
-		Schedule optimal_schedule = HillClimberRestartModel(cities, matrix);
-		printSchedule(optimal_schedule);
+		//out.println("Running the hill climbing model with restart");
+		//Schedule optimal_schedule = HillClimberRestartModel(cities, matrix);
+		//printSchedule(optimal_schedule);
 		//visualizeSchedule(optimal_schedule);
 		
 		//Hill climbing model (simulated annealing)
-		/*out.println("Running the hill climbing model (simulated annealing)");
+		out.println("Running the hill climbing model (simulated annealing)");
 		Schedule optimal = HillClimberSimulatedAnnealing(cities, matrix);
-		printSchedule(optimal);*/
+		printSchedule(optimal);
 		//visualizeSchedule(optimal);
 	}
 
