@@ -19,11 +19,12 @@ import java.io.IOException;
 public class Main {
 
 	public static final int 	NUM_INITIAL_SCHEDULES = 20,
-								NUM_RANDOM_ROUTES = 10000,
-								NO_IMPROVEMENT_ITERATIONS = 100,
-								NUM_ITERATIONS = 100000;
+								NUM_RANDOM_ROUTES = 1000,
+								NO_IMPROVEMENT_ITERATIONS = 1000,
+								NUM_ITERATIONS = 100000,
+								TEMPERATURE = 100000;
 
-	public static final double	COOLING_RATE = 0.003;
+	public static final double	COOLING_RATE = 0.001;
 
 	public static final long 	SEED = 441287210;
 
@@ -45,7 +46,7 @@ public class Main {
 			return 1.0;
 		}
 		// if new solution is worse, calculate acceptance probability
-		return Math.exp(new_profit-current_profit/temperature);
+		return Math.exp((new_profit-current_profit)/temperature);
 	}
 
 	Schedule SimulatedAnnealing(Cities cities, Matrix matrix) {
@@ -66,7 +67,7 @@ public class Main {
 			// TODO: find good values for temperature and the constant RATE
 			// TODO: plot temperature (y) versus number of mutations??
 			// TODO: plot profit (y) against number of mutations (x)
-			double temp = 10000;
+			double temp = TEMPERATURE;
 
 			int num_mutations = 0;
 			int tries = 0;
@@ -84,7 +85,7 @@ public class Main {
 					out.printf("Mutation: %d, profit: €%f\n", num_mutations, newSchedule.Profit());
 
 					// Decide whether the neighbour should be accepted or not
-					if(acceptanceProbability(newSchedule.Profit(), current_schedule.Profit(), temp) > Math.random()) {
+					if(acceptanceProbability(current_schedule.Profit(), newSchedule.Profit(), temp) > Math.random()) {
 						current_schedule = new Schedule(newSchedule);
 					}
 
@@ -140,13 +141,14 @@ public class Main {
 				// TODO: find good values for temperature and the constant RATE
 				// TODO: plot temperature (y) versus number of mutations??
 				// TODO: plot profit (y) against number of mutations (x)
-				double temp = 100000;
+				double temp = TEMPERATURE;
 				String filename = "C:\\workspace\\heuristic\\SimulatedAnnealing\\Schedule_" 
 				+ (k+1) + "_Temp_" + temp +"_CR_" + COOLING_RATE + ".txt";
 				filewriters.add(new FileWriter(new File(filename)));
 				FileWriter filewriter = filewriters.lastElement();
 
-				int num_accepted_mutations = 0;
+				//int num_accepted_mutations = 0;
+				int num_mutations=0;
 
 				// Loop until system has cooled
 				while(temp>1) {
@@ -158,6 +160,7 @@ public class Main {
 					//if(newSchedule.Mutate(rn2, cities)) {
 					if(newSchedule.Mutate(rn, cities)) {
 						newSchedule.CheckValidity();
+						num_mutations++;
 						
 						// TODO: print to text file and/or create graph
 						//out.printf("Mutation: %d, profit: €%f\n", num_mutations, newSchedule.Profit());
@@ -166,16 +169,21 @@ public class Main {
 						//filewriter.write(newDataPoint); 
 						
 						// Decide whether the neighbour should be accepted or not
-						if(acceptanceProbability(newSchedule.Profit(), current_schedule.Profit(), temp) > Math.random()) {
+						if(acceptanceProbability(current_schedule.Profit(), newSchedule.Profit(), temp) > Math.random()) {
 							current_schedule = new Schedule(newSchedule);
 							// kan ook denk ik: current_schedule = newSchedule;
-							num_accepted_mutations++;
-							String newDataPoint = num_accepted_mutations + "\t" + newSchedule.Profit() + "\n";
-							out.printf(newDataPoint);
-							filewriter.write(newDataPoint); // writes data point as mutation\tprofit (thus x tab y)
+							//num_accepted_mutations++;
+							
+							 // writes data point as mutation\tprofit (thus x tab y)
 							// bij mij in kladblok lijkt het alsof er geen enter tussen de regels staat,
 							// maar als je het document opent in word, zitten er wel regels tussen dus dat moet goed zijn.
 						}
+						
+						String newDataPoint = num_mutations + "\t" + current_schedule.Profit()/1000000 + "\n";
+						out.printf(newDataPoint);
+						filewriter.write(newDataPoint);
+						
+						
 
 						// Keep track of best schedule found so far
 						if(current_schedule.Profit() > best_schedule.Profit()) {
@@ -242,9 +250,84 @@ public class Main {
 				}
 			}
 			optimal_schedules.add(current_schedule);
-			out.printf("tries: %d\n", tries);
-			out.println();
 		}
+
+		Schedule best = new Schedule(optimal_schedules.get(0));
+
+		int k=1;
+		for(Schedule s: optimal_schedules) {
+			if(s.Profit()>best.Profit()) {
+				best = new Schedule(s);
+				System.out.println(k);
+			}
+
+			k++;
+
+		}
+		return best;
+	}
+	
+	Schedule HillClimberToFiles(Cities cities, Matrix matrix) { 
+
+		Vector<Schedule> schedules = new Vector<Schedule>();
+		Vector<Schedule> optimal_schedules = new Vector<Schedule>();
+		
+		try {
+
+			Vector<FileWriter> filewriters = new Vector<FileWriter>();
+
+			// create NUM_INITIAL_SCHEDULES initial random schedules
+			for(int i = 0; i<NUM_INITIAL_SCHEDULES; i++) {
+				Matrix m = new Matrix(matrix);
+				schedules.add(RandomModel(cities, m));
+			}
+			
+			// (run all initial schedules to find the local optima)
+			for(int k =0;k<schedules.size();k++) {
+				// Hill climbing algorithm 
+				Schedule current_schedule = new Schedule(schedules.get(k));
+				out.printf("Schedule: %d\n", k+1);
+
+				int num_mutations = 0;
+				int tries = 0;
+				
+				String filename = "C:\\workspace\\heuristic\\HillClimber\\HC_Schedule"
+						+ (k+1) + "_initialschedules_" + NUM_INITIAL_SCHEDULES + "_randomroutes_" 
+						+ NUM_RANDOM_ROUTES + ".txt";
+				filewriters.add(new FileWriter(new File(filename)));
+				FileWriter filewriter = filewriters.lastElement();
+
+				//TODO: Determine stop criteria. Now hardcoded to 100.000 mutations
+				for(int j=0;j< NUM_ITERATIONS;j++) {
+					Schedule s = new Schedule(current_schedule);
+					if(s.Mutate(rn, cities)) {
+						s.CheckValidity();
+						num_mutations++;
+						// TODO: print to text file and create graph
+						out.printf("Mutation: %d, profit: €%f\n", num_mutations, s.Profit());
+						if(s.Profit()>current_schedule.Profit()) { // als mutate succesvol, print statement voor grafiek
+							current_schedule = new Schedule(s); // x-as is teller hoe veel succesvolle mutates
+						}
+						
+						String newDataPoint = num_mutations + "\t" + current_schedule.Profit()/1000000 + "\n";
+						out.printf(newDataPoint);
+						filewriter.write(newDataPoint);
+						
+					}
+				}
+				optimal_schedules.add(current_schedule);
+				//out.printf("tries: %d\n", tries);
+				out.println();
+				filewriter.close();
+
+			}
+			
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+
+
+		
 
 		Schedule best = new Schedule(optimal_schedules.get(0));
 
@@ -323,14 +406,14 @@ public class Main {
 		return best;
 	}
 
-	Schedule HillClimberRestart2(Random rngen, Cities cities, Matrix matrix) { 		
+	Schedule HillClimberRestart2(Random rngen, int hometownID, Cities cities, Matrix matrix) { 		
 		Vector<Schedule> schedules = new Vector<Schedule>();
 		Vector<Schedule> optimal_schedules = new Vector<Schedule>();
 
 		// create NUM_INITIAL_SCHEDULES initial random schedules
 		for(int i = 0; i<NUM_INITIAL_SCHEDULES; i++) {
 			Matrix m = new Matrix(matrix);
-			schedules.add(RandomModel(rngen, 0, cities, m));
+			schedules.add(RandomModel(rngen, hometownID, cities, m));
 		}
 
 		// (run all initial schedules to find the local optima)
@@ -402,36 +485,40 @@ public class Main {
 				schedules.add(RandomModel(cities, m));
 			}
 
+			String filename = "C:\\workspace\\heuristic\\HillClimberRestart\\HCRestart_" + "_initialschedules_" + NUM_INITIAL_SCHEDULES + "_randomroutes_" 
+					+ NUM_RANDOM_ROUTES + ".txt";
+			filewriters.add(new FileWriter(new File(filename)));
+			FileWriter filewriter = filewriters.lastElement();
+			
+			int num_mutations = 0;
+			
 			// (run all initial schedules to find the local optima)
 			for(int k =0;k<schedules.size();k++) {
 				// Hill climbing algorithm 
 				Schedule current_schedule = new Schedule(schedules.get(k));
 				//out.printf("Schedule: %d\n", k+1);
 
-				int num_mutations = 0;
-				int num_accepted_mutations = 0;
+				//int num_accepted_mutations = 0;
 				//int tries = 0;
-				int no_improvement_iterations = 0;
-				
-				String filename = "C:\\workspace\\heuristic\\HillClimberRestart\\HCRestart_Schedule_" 
-						+ (k+1) + "_initialschedules_" + NUM_INITIAL_SCHEDULES + "_randomroutes_" 
-						+ NUM_RANDOM_ROUTES + ".txt";
-				filewriters.add(new FileWriter(new File(filename)));
-				FileWriter filewriter = filewriters.lastElement();
+				int no_improvement_iterations = 0;				
 
 				Schedule s = new Schedule(current_schedule);
 				if(s.Mutate(rn, cities)) {
 					s.CheckValidity();
 					num_mutations++;
-					String newDataPoint = num_mutations + "\t" + s.Profit() + "\n";
-					out.printf(newDataPoint);
-					filewriter.write(newDataPoint);
+					
 
 					//out.printf("Mutation: %d, profit: €%f\n", num_mutations, s.Profit());
 					if(s.Profit()>current_schedule.Profit()) { 
 						current_schedule = new Schedule(s); 
 						
 					}
+					
+					String newDataPoint = num_mutations + "\t" + current_schedule.Profit()/1000000 + "\n";
+					out.printf(newDataPoint);
+					filewriter.write(newDataPoint);
+					
+					
 				}
 
 				// if no improvement found for NO_IMPROVEMENT_ITERATIONS iterations, stop searching for a better solution
@@ -443,9 +530,7 @@ public class Main {
 						num_mutations++;
 						// TODO: print to text file and/or create graph
 						
-						String newDataPoint = num_mutations + "\t" + s.Profit() + "\n";
-						out.printf(newDataPoint);
-						filewriter.write(newDataPoint);
+						
 						
 						//out.printf("Mutation: %d, profit: €%f\n", num_mutations, s.Profit());
 						if(s.Profit()>current_schedule.Profit()) { 
@@ -454,14 +539,19 @@ public class Main {
 						} else {
 							no_improvement_iterations++;
 						}
+						
+						String newDataPoint = num_mutations + "\t" + current_schedule.Profit()/1000000 + "\n";
+						out.printf(newDataPoint);
+						filewriter.write(newDataPoint);
 					}
 				}
 
 				optimal_schedules.add(current_schedule);
 				//out.printf("tries: %d\n", tries);
 				out.println();
-				filewriter.close();
+
 			}
+			filewriter.close();
 			
 		} catch(IOException e) {
 			e.printStackTrace();
@@ -624,7 +714,7 @@ public class Main {
 		for(int i=0; i<cities.size(); i++) {
 			out.println(i);
 			Random rngen = new Random(SEED);
-			Schedule current_schedule = HillClimberRestart2(rngen, cities, matrix);
+			Schedule current_schedule = HillClimberRestart2(rngen, i, cities, matrix);
 			//Schedule current_schedule = HillClimberRestart2(rn, cities, matrix);
 			if(current_schedule.Profit()>best_schedule.Profit()) {
 				best_schedule = current_schedule;
@@ -664,9 +754,9 @@ public class Main {
 		//visualizeSchedule(hillclimber_restart_schedule);
 
 		//Hill climbing model (simulated annealing)
-		out.println("Running the simulated annealing model");
-		Schedule simulated_annealing_schedule = SimulatedAnnealing(cities, matrix);
-		printSchedule(simulated_annealing_schedule);
+//		out.println("Running the simulated annealing model");
+//		Schedule simulated_annealing_schedule = SimulatedAnnealing(cities, matrix);
+//		printSchedule(simulated_annealing_schedule);
 		//visualizeSchedule(simulated_annealing_schedule);
 
 		//Advanced questions: which hometown is best?
@@ -680,12 +770,16 @@ public class Main {
 
 		// To find better values of temperature and cooling rate
 		// this randomModel so we compare temp and rate with the same sequence of random numbers		
-//		out.println("Writing the profit after mutations data during simulated annealing to textfiles...");
-//		SimulatedAnnealing2(cities, matrix); // op een of andere manier zijn de profits heel laag..
+		out.println("Writing the profit after mutations data during simulated annealing to textfiles...");
+		Schedule simulatedAnnealingToFiles = SimulatedAnnealingToFiles(cities, matrix); // op een of andere manier zijn de profits heel laag..
+		printSchedule(simulatedAnnealingToFiles);
 		
 //		out.println("Writing the profit after mutations data during hill climber with restart to textfiles...");
 //		Schedule HillClimberRestartToFiles = HillClimberRestartToFiles(cities, matrix);
 //		printSchedule(HillClimberRestartToFiles);
+		
+//		Schedule HillClimberToFiles = HillClimberToFiles(cities, matrix);
+//		printSchedule(HillClimberToFiles);
 		
 		//plots in R
 	}
