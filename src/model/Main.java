@@ -760,19 +760,20 @@ public class Main {
 		//visualizeSchedule(simulated_annealing_schedule);
 
 		//Advanced questions: which hometown is best?
-//		out.println("Searching for the best hometown...\n");
-//		Schedule best_hometown_schedule = bestHometownSchedule(cities, matrix);
-//		int best_hometown_id = best_hometown_schedule.Routes().get(0).hometownID();
-//		printSchedule(best_hometown_schedule;
-//		out.printf("The best hometown is %s\n", cities.getCity(best_hometown_id).toString());
-//		out.printf("The profit corresponding to the schedule is €%f", best_hometown_schedule.Profit());
-		// The best hometown is Amsterdam (20 initial schedules and 1000 NUM_RANDOM_ROUTES)
+		out.println("Searching for the best hometown...\n");
+		Schedule best_hometown_schedule = bestHometownSchedule(cities, matrix);
+		int best_hometown_id = best_hometown_schedule.Routes().get(0).hometownID();
+		printSchedule(best_hometown_schedule);
+		out.printf("The best hometown is %s\n", cities.getCity(best_hometown_id).toString());
+		out.printf("The profit corresponding to the schedule is €%f", best_hometown_schedule.Profit());
+		// The best hometown is Madrid (20 initial schedules and 1000 NUM_RANDOM_ROUTES)
+		// Profit: €11,984,624.00
 
 		// To find better values of temperature and cooling rate
 		// this randomModel so we compare temp and rate with the same sequence of random numbers		
-		out.println("Writing the profit after mutations data during simulated annealing to textfiles...");
-		Schedule simulatedAnnealingToFiles = SimulatedAnnealingToFiles(cities, matrix); // op een of andere manier zijn de profits heel laag..
-		printSchedule(simulatedAnnealingToFiles);
+//		out.println("Writing the profit after mutations data during simulated annealing to textfiles...");
+//		Schedule simulatedAnnealingToFiles = SimulatedAnnealingToFiles(cities, matrix); // op een of andere manier zijn de profits heel laag..
+//		printSchedule(simulatedAnnealingToFiles);
 		
 //		out.println("Writing the profit after mutations data during hill climber with restart to textfiles...");
 //		Schedule HillClimberRestartToFiles = HillClimberRestartToFiles(cities, matrix);
