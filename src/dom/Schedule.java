@@ -9,6 +9,11 @@ public class Schedule {
 	private Vector<Route> routes;
 	private Matrix matrix;
 	
+	public Schedule() {
+		routes= new Vector<Route>();
+		matrix = new Matrix();
+	}
+	
 	public Schedule(Schedule schedule) {
 		this.routes = new Vector<Route>();
 		for(int i=0;i<schedule.routes.size();i++) {

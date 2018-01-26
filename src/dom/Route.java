@@ -14,14 +14,13 @@ public class Route {
 	private static final int MAX_PASSENGERS = 199;
 
 	private Vector<City> cities;
-	private Vector<Double> tank; //number of kilometers the plane can still travel after arrival at a city
+	private Vector<Double> tank;
 	public double current_time;
 	
 	public double profit;
 	private Vector<Integer> passengers; 
 	Vector<Double> distances;
 	private Bookings bookings;
-	
 	private int hometownID;
 	
 	/**
@@ -37,17 +36,7 @@ public class Route {
 		profit=0;
 		this.hometownID = 0; // temporarily added
 	}
-	
-	public Route(int hometownID){
-		setCities(new Vector<City>());
-		setPassengers(new Vector<Integer>());
-		distances = new Vector<Double>();
-		bookings = new Bookings();
-		tank = new Vector<Double>();
-		current_time=0;
-		profit=0;
-		this.hometownID = hometownID;
-	}
+
 	/**
 	 * Copy constructor of route
 	 * @param route = route to be copied from
@@ -62,9 +51,8 @@ public class Route {
 		this.profit = route.profit;
 		this.hometownID = route.hometownID; // temporarily added
 	}
-	
-	
-	public Route(City city){
+
+	public Route(City city, int home_base_id){
 		setCities(new Vector<City>());
 		getCities().add(city);
 		getCities().add(city);
@@ -79,13 +67,10 @@ public class Route {
 		current_time=0;
 		profit=0;
 		out = new PrintStream(System.out);
+		this.hometownID = home_base_id;
 		// if this constructor is called, setHomeTownID needs to be called to set hometown! TEMPORARILY
 	}
 
-	public void setHomeTownID(int id) {
-		this.hometownID=id;
-	}
-	
 	public int hometownID() {
 		return this.hometownID;
 	}
