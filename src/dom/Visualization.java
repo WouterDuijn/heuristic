@@ -14,13 +14,16 @@ public class Visualization {
 	 Dimension imgDim = new Dimension(200,200);
      BufferedImage mazeImage = null;
 
-    public Visualization(){
+    public Visualization(Schedule schedule){
 		try {
 			mazeImage = ImageIO.read(new File("C:\\workspace\\heuristic\\inp\\europe-scaled.png"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		DrawSchedule(schedule);
+		Show();
     }
     
     public void Show() {
@@ -38,4 +41,24 @@ public class Visualization {
         	g2d.drawLine(c1.x, c1.y, c2.x, c2.y);
         }
     }
+    
+    void DrawSchedule(Schedule schedule){
+		Vector<Route> routes = schedule.Routes();
+		Vector<Color>colors = new Vector<Color>();
+		colors.add(Color.BLUE);
+		colors.add(Color.BLACK);
+		colors.add(Color.RED);
+		colors.add(Color.YELLOW);
+		colors.add(Color.GREEN);
+		colors.add(Color.PINK);
+
+		for(int i=0;i<routes.size();i++) {
+			Route route = routes.get(i);
+			Vector<Coordinate> coor = new Vector<Coordinate>();
+			for(int j =0; j<route.getCities().size();j++){
+				coor.add(new Coordinate(route.getCities().get(j).X(), route.getCities().get(j).Y()));
+			}
+			ColourRoute(coor, colors.get(i));			
+		}
+	}
 }

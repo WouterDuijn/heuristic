@@ -7,7 +7,7 @@ public class City {
 	private int x;
 	private int y;
 	
-	// er is nu een coordinate class, misschien kunnen we die dan ook hier gebruiken, of beter niet?
+	//Er is nu een coordinate class, misschien kunnen we die dan ook hier gebruiken, of beter niet?
 	public City(int id, String name, int x, int y){
 		this.name=name;
 		this.id=id;
