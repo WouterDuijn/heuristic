@@ -22,13 +22,13 @@ public class Main {
 	public static final Algorithm ALGORITHM = Algorithm.SimulatedAnnealing;
 	public static final boolean WRITE_TO_FILE = true;
 	public static final int 	NR_RUNS = 50,
-								TOTAL_ITERATIONS=1000000,
+								TOTAL_ITERATIONS=500000,
 								NO_IMPROVEMENT_ITERATIONS = 1000,
 								NUM_RANDOM_ROUTES = 100;
 								
 	//Simulated Annealing parameters
-	public static final int TEMPERATURE = 109465;
-	public static final double	COOLING_RATE = 0.00058;
+	public static final int TEMPERATURE = 22136;
+	public static final double	COOLING_RATE = 0.001;
 
 	public static final long 	SEED = 441287210;
 
@@ -107,8 +107,6 @@ public class Main {
 						
 						// Cool the system
 						temp *= 1 - cooling_rate;	
-						//temp = TEMPERATURE/(1+(1+cooling_rate)*Math.log(1+iteration));
-						//temp = TEMPERATURE/(1+(1+cooling_rate)*iteration);
 					}			
 				}
 				optimal_schedules.add(best_schedule);
@@ -378,3 +376,4 @@ public class Main {
 	}
 
 }
+
