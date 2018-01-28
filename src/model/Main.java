@@ -19,8 +19,8 @@ public class Main {
 	public enum Algorithm {Random, HillClimber, HillClimberRestart, SimulatedAnnealing,
 		HomeBase}
 	
-	public static final Algorithm ALGORITHM = Algorithm.Random;
-	public static final boolean WRITE_TO_FILE = false;
+	public static final Algorithm ALGORITHM = Algorithm.SimulatedAnnealing;
+	public static final boolean WRITE_TO_FILE = true;
 	public static final int 	NR_RUNS = 50,
 								TOTAL_ITERATIONS=2000000,
 								NO_IMPROVEMENT_ITERATIONS = 1000,
@@ -137,9 +137,9 @@ public class Main {
 				//Initialize file writer stuff
 				FileWriter filewriter=null;
 				if(write_to_file) {
-					String filename = "C:\\workspace\\heuristic\\HillClimber\\HC_Schedule"
-							+ (k+1) + "_initialschedules_" + NR_RUNS + "_randomroutes_" 
-							+ NUM_RANDOM_ROUTES + ".txt";
+					String filename = "C:\\workspace\\heuristic\\HillClimber\\HC_Schedule_"
+							+ (k+1) + "_runs_" + NR_RUNS + "_total_iterations_"
+							+ TOTAL_ITERATIONS + "_randomroutes_" + NUM_RANDOM_ROUTES + ".txt";
 					filewriters.add(new FileWriter(new File(filename)));
 					filewriter = filewriters.lastElement();
 				}
@@ -193,8 +193,9 @@ public class Main {
 				//Filewriter initialization
 				FileWriter filewriter = null;
 				if(write_to_file) {
-					String filename = "C:\\workspace\\heuristic\\HillClimberRestart\\HCRestart_" + (k+1)+
-							"_initialschedules_"+ NR_RUNS + "_randomroutes_" + NUM_RANDOM_ROUTES + ".txt";
+					String filename = "C:\\workspace\\heuristic\\HillClimberRestart\\HCRestart_" + (k+1)
+							+ "_runs_" + NR_RUNS + "_total_iterations_"
+							+ TOTAL_ITERATIONS + "_randomroutes_" + NUM_RANDOM_ROUTES + ".txt";
 							filewriters.add(new FileWriter(new File(filename)));
 					filewriter = filewriters.lastElement();
 				}
@@ -321,6 +322,8 @@ public class Main {
 			City homebase = cities.getCity(i);
 			Random rngen = new Random(SEED);
 			Schedule current_schedule = HillClimberRestartModel(rngen, cities, homebase, matrix, false);
+			// TODO: use simulatedAnnealing (with parameter rngen) to determine best hometown?
+			//Schedule current_schedule = SimulatedAnnealing(rngen, ...)
 			if(current_schedule.Profit()>best_schedule.Profit()) {
 				best_schedule = current_schedule;
 			}					

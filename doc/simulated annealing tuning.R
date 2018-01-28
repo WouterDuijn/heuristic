@@ -1,78 +1,14 @@
-setwd("C:/workspace/heuristic/SimulatedAnnealing")
-
-# highest profit
-temp_10000_CR_0.003_1 <- read.table("Schedule_1_Temp_10000.0_CR_0.003.txt", header=FALSE, sep="\t")
-temp_10000_CR_0.003_2 <- read.table("Schedule_2_Temp_10000.0_CR_0.003.txt", header=FALSE, sep="\t")
-temp_10000_CR_0.003_3 <- read.table("Schedule_3_Temp_10000.0_CR_0.003.txt", header=FALSE, sep="\t")
-temp_10000_CR_0.003_4 <- read.table("Schedule_4_Temp_10000.0_CR_0.003.txt", header=FALSE, sep="\t")
-temp_10000_CR_0.003_5 <- read.table("Schedule_5_Temp_10000.0_CR_0.003.txt", header=FALSE, sep="\t")
-
-plot(temp_10000_CR_0.003_1, xlab="Mutation", ylab="Profit (€)", type='l')
-lines(temp_10000_CR_0.003_2, col='blue')
-lines(temp_10000_CR_0.003_3, col='red')
-lines(temp_10000_CR_0.003_4, col='pink')
-lines(temp_10000_CR_0.003_5, col='green')
-
-temp_10000_CR_0.005_1 <- read.table("Schedule_1_Temp_10000.0_CR_0.005.txt", header=FALSE, sep="\t")
-temp_10000_CR_0.005_2 <- read.table("Schedule_2_Temp_10000.0_CR_0.005.txt", header=FALSE, sep="\t")
-temp_10000_CR_0.005_3 <- read.table("Schedule_3_Temp_10000.0_CR_0.005.txt", header=FALSE, sep="\t")
-temp_10000_CR_0.005_4 <- read.table("Schedule_4_Temp_10000.0_CR_0.005.txt", header=FALSE, sep="\t")
-temp_10000_CR_0.005_5 <- read.table("Schedule_5_Temp_10000.0_CR_0.005.txt", header=FALSE, sep="\t")
-
-plot(temp_10000_CR_0.005_1, xlab="Mutation", ylab="Profit (€)", type='l')
-lines(temp_10000_CR_0.005_2, col='blue')
-lines(temp_10000_CR_0.005_3, col='red')
-lines(temp_10000_CR_0.005_4, col='pink')
-lines(temp_10000_CR_0.005_5, col='green')
-
-temp_100000_CR_0.003_1 <- read.table("Schedule_1_Temp_100000.0_CR_0.003.txt", header=FALSE, sep="\t")
-temp_100000_CR_0.003_2 <- read.table("Schedule_2_Temp_100000.0_CR_0.003.txt", header=FALSE, sep="\t")
-temp_100000_CR_0.003_3 <- read.table("Schedule_3_Temp_100000.0_CR_0.003.txt", header=FALSE, sep="\t")
-temp_100000_CR_0.003_4 <- read.table("Schedule_4_Temp_100000.0_CR_0.003.txt", header=FALSE, sep="\t")
-temp_100000_CR_0.003_5 <- read.table("Schedule_5_Temp_100000.0_CR_0.003.txt", header=FALSE, sep="\t")
-
-plot(temp_100000_CR_0.003_1, xlab="Mutation", ylab="Profit (€)", type='l', lty=3)
-lines(temp_100000_CR_0.003_2, col='blue')
-lines(temp_100000_CR_0.003_3, col='red')
-lines(temp_100000_CR_0.003_4, col='pink')
-lines(temp_100000_CR_0.003_5, col='green')
-
-plot(temp_100000_CR_0.003_1, type='l', lty=3, col="blue",
-     yaxt="n", xaxt = "n", xlab="", ylab="")
-axis(2, cex.axis=1.25)
-axis(1, cex.axis=1.5)
-mtext("Mutation", side=1, line=2.2, cex=1.5)
-mtext("Profit (€)", side=2, line=2.2, cex=1.5)
-title(main=, "Hill Climber Restart Scores", cex.main=2)
-
-#Temperature 100,000 CR=0.001
-setwd("C:/workspace/heuristic/SimulatedAnnealing")
-
-temp_100000_CR_0.001_1 <- read.table("Schedule_1_Temp_100000.0_CR_0.001.txt", header=FALSE, sep="\t")
-temp_100000_CR_0.001_2 <- read.table("Schedule_2_Temp_100000.0_CR_0.001.txt", header=FALSE, sep="\t")
-temp_100000_CR_0.001_3 <- read.table("Schedule_3_Temp_100000.0_CR_0.001.txt", header=FALSE, sep="\t")
-temp_100000_CR_0.001_4 <- read.table("Schedule_4_Temp_100000.0_CR_0.001.txt", header=FALSE, sep="\t")
-temp_100000_CR_0.001_5 <- read.table("Schedule_5_Temp_100000.0_CR_0.001.txt", header=FALSE, sep="\t")
-
-plot(temp_100000_CR_0.001_1, type='l', col="blue",
-     yaxt="n", xaxt = "n", xlab="", ylab="", xlim=c(-100,6000))
-axis(2, cex.axis=1.25)
-axis(1, cex.axis=1.5)
-mtext("State", side=1, line=2.2, cex=1.5)
-mtext("Profit (€mln)", side=2, line=2.2, cex=1.5)
-title(main=, "Simulated Annealing Scores", cex.main=2)
-
-temp_100000_CR_0.001_rr10000_1 <- read.table("Schedule_1_Temp_100000.0_CR_0.001randomroutes_10000.txt", header=FALSE, sep="\t")
-temp_100000_CR_0.001_rr10000_2 <- read.table("Schedule_2_Temp_100000.0_CR_0.001randomroutes_10000.txt", header=FALSE, sep="\t")
-temp_100000_CR_0.001_rr10000_3 <- read.table("Schedule_3_Temp_100000.0_CR_0.001randomroutes_10000.txt", header=FALSE, sep="\t")
-temp_100000_CR_0.001_rr10000_4 <- read.table("Schedule_4_Temp_100000.0_CR_0.001randomroutes_10000.txt", header=FALSE, sep="\t")
-temp_100000_CR_0.001_rr10000_5 <- read.table("Schedule_5_Temp_100000.0_CR_0.001randomroutes_10000.txt", header=FALSE, sep="\t")
-
 # SIMULATED ANNEALING
 
 #NEWEST. Using 500,000 total iterations (50 runs of 10,000 iterations)
-plotSimulatedAnnealing <- function(temperature, coolingRate, numLines) {
+plotSimulatedAnnealing <- function(temperature, coolingRate, numLines, toBePlotted) {
   setwd("C:/workspace/heuristic/SimulatedAnnealing")
+  
+  if(missing(toBePlotted)) {
+    toBePlotted = 5
+  } else if(toBePlotted > 5) {
+    toBePlotted = 5
+  }
   
   #cl <- colors(distinct = TRUE)
   #set.seed(15887) 
@@ -80,14 +16,14 @@ plotSimulatedAnnealing <- function(temperature, coolingRate, numLines) {
   mycols <- c("blue", "black", "red", "green", "purple")
   
   best_profits <- c(0, 0, 0, 0, 0)
-  min_best_profits <- min(best)
-  index_min_best <- which(best == min_best_profits)[1]
+  min_best_profits <- min(best_profits)
+  index_min_best <- which(best_profits == min_best_profits)[1]
   
   best_filenumbers <- c(0, 0, 0, 0, 0)
   
   plotted <- 0
   
-  for(i in 1:50) {
+  for(i in 1:numLines) {
     file <- paste("Schedule",i,"Temp", temperature, "CR", coolingRate, sep='_')
     file <- paste(file, ".txt", sep='')
     
@@ -103,7 +39,7 @@ plotSimulatedAnnealing <- function(temperature, coolingRate, numLines) {
     }
   }
   
-  for(j in 1:5) {
+  for(j in 1:toBePlotted) {
     file <- paste("Schedule",best_filenumbers[j],"Temp", temperature, "CR", coolingRate, sep='_')
     file <- paste(file, ".txt", sep='')
     if(plotted > 0) {
@@ -151,10 +87,11 @@ plotSimulatedAnnealing(temp, CR, 50)
 # tested for 2,000,000 total iterations and 50 runs. 
 # Too many deteriorations accepted in early stages. 
 
-# Highest profit 11.67473 mln, schedule 43
+# !!! Highest profit 11.67473 mln, schedule 43
 temp = 163048
 CR ="3.0E-4"
 plotSimulatedAnnealing(temp, CR, 50)
+plotSimulatedAnnealing(temp, CR, 50, 1)
 # tested for 2,000,000 total iterations and 50 runs. 
 
 # Highest profit 11.51677 mln, schedule 31
