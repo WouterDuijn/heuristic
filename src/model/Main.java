@@ -19,16 +19,16 @@ public class Main {
 	public enum Algorithm {Random, HillClimber, HillClimberRestart, SimulatedAnnealing,
 		HomeBase}
 	
-	public static final Algorithm ALGORITHM = Algorithm.SimulatedAnnealing;
-	public static final boolean WRITE_TO_FILE = true;
+	public static final Algorithm ALGORITHM = Algorithm.Random;
+	public static final boolean WRITE_TO_FILE = false;
 	public static final int 	NR_RUNS = 50,
-								TOTAL_ITERATIONS=500000,
+								TOTAL_ITERATIONS=2000000,
 								NO_IMPROVEMENT_ITERATIONS = 1000,
 								NUM_RANDOM_ROUTES = 100;
 								
 	//Simulated Annealing parameters
-	public static final int TEMPERATURE = 22136;
-	public static final double	COOLING_RATE = 0.001;
+	public static final int TEMPERATURE = 163048;
+	public static final double	COOLING_RATE = 0.0003;
 
 	public static final long 	SEED = 441287210;
 
@@ -59,7 +59,6 @@ public class Main {
 			Vector<FileWriter> filewriters = new Vector<FileWriter>();
 
 			for(int k =0;k<NR_RUNS;k++) {
-
 				//File writer stuff
 				FileWriter filewriter=null;
 				if(write_to_file) {
@@ -81,7 +80,6 @@ public class Main {
 				int iteration=0;
 
 				// Loop until system has cooled
-				//TODO: Determine so it has TOTAL_ITERATIONS/NR_RUNS
 				while(temp>1) {
 					// Create new neighbor schedule
 					Schedule newSchedule = new Schedule(current_schedule);
@@ -167,7 +165,6 @@ public class Main {
 						}
 					}
 				}
-				
 				optimal_schedules.add(current_schedule);
 				if(write_to_file) {
 					filewriter.close();
@@ -270,11 +267,10 @@ public class Main {
 
 	Schedule RandomModel(Random rngen, City homebase, Cities cities, Matrix inputMatrix) {
 		Schedule schedule = new Schedule(inputMatrix);
-
+		
 		for(int k=0; k<Schedule.NR_PLANES;k++) {
 			Route optimalRoute =new Route();
 			for(int j = 0; j<NUM_RANDOM_ROUTES; j++){ 
-
 				int randomStartCity = rngen.nextInt(cities.size());
 				Route route = new Route(cities.getCity(randomStartCity), homebase.ID());
 				Matrix matrix = new Matrix(schedule.Matrix());
@@ -301,6 +297,7 @@ public class Main {
 					if(valid_city_insert) {
 						route = new Route(cur_route);
 						matrix = new Matrix(cur_matrix);
+						j++;
 
 					}
 					route.CheckValidity();
@@ -339,6 +336,7 @@ public class Main {
 		
 		Schedule schedule = new Schedule();
 		
+		long time = System.currentTimeMillis();
 		switch(ALGORITHM) {
 		case Random:
 			System.out.println("Running the random model");
@@ -364,6 +362,8 @@ public class Main {
 			out.printf("The best hometown is %s\n", best_homebase.toString());
 			break;
 		}
+		
+		out.println("Total time: " +((System.currentTimeMillis()-time)/1000) );
 		
 		//Print and visualize best schedule
 		printSchedule(schedule);
