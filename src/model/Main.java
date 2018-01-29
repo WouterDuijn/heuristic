@@ -18,7 +18,7 @@ import java.io.IOException;
 
 public class Main {
 
-	public static final int 	NUM_INITIAL_SCHEDULES = 25,
+	public static final int 	NUM_INITIAL_SCHEDULES = 20,
 								NUM_RANDOM_ROUTES = 1000,
 								NO_IMPROVEMENT_ITERATIONS = 10000;
 
@@ -362,7 +362,7 @@ public class Main {
 
 		for(int k=0; k<Schedule.NR_PLANES;k++) {
 			Route optimalRoute =new Route();
-			for(int j = 0; j<NUM_RANDOM_ROUTES; j++){ // create multiple routes to find best
+			for(int j = 0; j<NUM_RANDOM_ROUTES*NUM_INITIAL_SCHEDULES; j++){ // create multiple routes to find best
 
 				int randomStartCity = rn.nextInt(cities.size());
 				Route route = new Route(cities.getCity(randomStartCity));
@@ -467,10 +467,10 @@ public class Main {
 
 		Vector<Color>colors = new Vector<Color>();
 		colors.add(Color.BLUE);
-		colors.add(Color.BLACK);
+		colors.add(Color.GREEN);
 		colors.add(Color.RED);
 		colors.add(Color.YELLOW);
-		colors.add(Color.GREEN);
+		colors.add(Color.BLACK);
 		colors.add(Color.PINK);
 
 		Visualization randomMap = new Visualization();
@@ -516,10 +516,10 @@ public class Main {
 		Matrix matrix = parser.ParseMatrices(cities.size());
 
 		//Random Model
-		//System.out.println("Running the random model");
-		//Schedule schedule = RandomModel(cities, matrix);
-		//printSchedule(schedule);
-		//visualizeSchedule(schedule);
+		System.out.println("Running the random model");
+		Schedule schedule = RandomModel(cities, matrix);
+		printSchedule(schedule);
+		visualizeSchedule(schedule);
 
 		//Hill climbing model with restart
 		//out.println("Running the hill climbing model with restart");
@@ -528,9 +528,9 @@ public class Main {
 		//visualizeSchedule(optimal_schedule);
 
 		//Hill climbing model (simulated annealing)
-		out.println("Running the hill climbing model (simulated annealing)");
-		Schedule optimal = SimulatedAnnealing(cities, matrix);
-		printSchedule(optimal);
+//		out.println("Running the hill climbing model (simulated annealing)");
+//		Schedule optimal = SimulatedAnnealing(cities, matrix);
+//		printSchedule(optimal);
 		//visualizeSchedule(optimal);
 
 		//Advanced questions: which hometown is best?
