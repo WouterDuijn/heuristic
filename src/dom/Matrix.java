@@ -5,6 +5,11 @@ public class Matrix {
 	private double[][] distances;
 	private int[][] passengers;
 	
+	public Matrix() {
+		passengers = new int[0][0];
+		distances = new double[0][0];
+	}
+	
 	public Matrix(Matrix matrix) {
 		this.passengers = matrix.DeepCopyPassengers();
 		this.distances = matrix.distances;
