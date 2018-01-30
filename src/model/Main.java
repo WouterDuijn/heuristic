@@ -19,10 +19,10 @@ public class Main {
 	public enum Algorithm {Random, HillClimber, HillClimberRestart, SimulatedAnnealing,
 		HomeBase}
 	
-	public static final Algorithm ALGORITHM = Algorithm.SimulatedAnnealing;
+	public static final Algorithm ALGORITHM = Algorithm.HomeBase;
 	public static final boolean WRITE_TO_FILE = true;
-	public static final int 	NR_RUNS = 50,
-								TOTAL_ITERATIONS=2000000,
+	public static final int 	NR_RUNS = 1,
+								TOTAL_ITERATIONS=40000,
 								NO_IMPROVEMENT_ITERATIONS = 1000,
 								NUM_RANDOM_ROUTES = 100;
 								
@@ -64,8 +64,8 @@ public class Main {
 				if(write_to_file) {
 					String filename = "C:\\workspace\\heuristic\\SimulatedAnnealing\\Schedule_" 
 							+ (k+1) + "_Temp_" + temperature +"_CR_" + cooling_rate + ".txt";
-							filewriters.add(new FileWriter(new File(filename)));
-							filewriter = filewriters.lastElement();
+					filewriters.add(new FileWriter(new File(filename)));
+					filewriter = filewriters.lastElement();
 				}
 				
 				// Initialize initial solution
@@ -196,7 +196,7 @@ public class Main {
 					String filename = "C:\\workspace\\heuristic\\HillClimberRestart\\HCRestart_" + (k+1)
 							+ "_runs_" + NR_RUNS + "_total_iterations_"
 							+ TOTAL_ITERATIONS + "_randomroutes_" + NUM_RANDOM_ROUTES + ".txt";
-							filewriters.add(new FileWriter(new File(filename)));
+					filewriters.add(new FileWriter(new File(filename)));
 					filewriter = filewriters.lastElement();
 				}
 				
@@ -315,18 +315,49 @@ public class Main {
 		return schedule;
 	}
 
-	Schedule bestHometownSchedule(Cities cities, Matrix matrix) {
+	Schedule bestHometownSchedule(Cities cities, Matrix matrix, boolean write_to_file) {
+		// set NR_RUNS = 1, TOTAL_ITERATIONS = 2,000,000 / 50 = 40,000
 		Schedule best_schedule = new Schedule(matrix);
-
+		Vector<FileWriter> filewriters = new Vector<FileWriter>();
+		
+		int runs = 50;
+		
 		for(int i=0; i<cities.size(); i++) {
 			City homebase = cities.getCity(i);
 			Random rngen = new Random(SEED);
-			Schedule current_schedule = HillClimberRestartModel(rngen, cities, homebase, matrix, false);
-			// TODO: use simulatedAnnealing (with parameter rngen) to determine best hometown?
-			//Schedule current_schedule = SimulatedAnnealing(rngen, ...)
-			if(current_schedule.Profit()>best_schedule.Profit()) {
-				best_schedule = current_schedule;
-			}					
+			
+			try {
+				FileWriter filewriter = null;
+				
+				if(write_to_file) {
+					String filename = "C:\\workspace\\heuristic\\BestHomeTown\\City_" + i
+							+ "_total_iterations_" + TOTAL_ITERATIONS + "_runs_"
+							+ runs + "_randomroutes_" + NUM_RANDOM_ROUTES + ".txt";
+					filewriters.add(new FileWriter(new File(filename)));
+					filewriter = filewriters.lastElement();
+				}
+			
+				for(int j=0; j<runs; j++) { // 50 runs, as usual
+					Schedule current_schedule = HillClimberRestartModel(rngen, cities, homebase, matrix, false); // 1 run of 40,000 iterations
+					// TODO: use simulatedAnnealing (with parameter rngen) to determine best hometown?
+					//Schedule current_schedule = SimulatedAnnealing(rngen, ...)
+
+					if(current_schedule.Profit()>best_schedule.Profit()) {
+						best_schedule = current_schedule;
+					}	
+					if(write_to_file) {
+						filewriter.write(current_schedule.Profit()/1000000 + "\n");
+					}					
+				}
+				
+				if(write_to_file) {
+					filewriter.close();
+				}
+				
+			} catch(IOException e) {
+				e.printStackTrace();
+			}
+			
 		}
 		return best_schedule;
 	}
@@ -360,7 +391,7 @@ public class Main {
 			break;
 		case HomeBase:
 			out.println("Searching for the best hometown...\n");
-			schedule = bestHometownSchedule(cities, matrix);
+			schedule = bestHometownSchedule(cities, matrix, WRITE_TO_FILE);
 			City best_homebase = cities.getCity(schedule.Routes().get(0).hometownID());
 			out.printf("The best hometown is %s\n", best_homebase.toString());
 			break;
