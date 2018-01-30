@@ -1,3 +1,5 @@
+par(mfrow=c(2,3))
+
 plotHillClimber <- function(toBePlotted, runs, totalIterations, rroutes) {
   setwd("C:/workspace/heuristic/HillClimber")
   
@@ -45,14 +47,17 @@ plotHillClimber <- function(toBePlotted, runs, totalIterations, rroutes) {
       plotted = plotted+1
       
     } else {
+      #plot(read.table(file, header=FALSE, sep="\t"), type='l', col=mycols[j],
+      #     yaxt="n", xaxt = "n", xlab="", ylab="", ylim=c(6,12), xlim=c(-100, 4000))
+      #axis(2, cex.axis=1.25)
+      #axis(1, cex.axis=1.5)
+      #mtext("State", side=1, line=2.2, cex=1.5)
+      #mtext("Profit (€mln)", side=2, line=2.2, cex=1.5)
+      #title(main=, "Hill Climber Scores", cex.main=2)
       plot(read.table(file, header=FALSE, sep="\t"), type='l', col=mycols[j],
-           yaxt="n", xaxt = "n", xlab="", ylab="", ylim=c(7, 12.5), xlim=c(-100, 4000))
-      axis(2, cex.axis=1.25)
-      axis(1, cex.axis=1.5)
-      mtext("State", side=1, line=2.2, cex=1.5)
-      mtext("Profit (€mln)", side=2, line=2.2, cex=1.5)
-      title(main=, "Hill Climber Scores", cex.main=2)
-      
+           ylim=c(6,12), xlim=c(-100, 4000), main="Hill Climber Scores",
+           xlab="State", ylab="Profit (€mln)")
+
       plotted = plotted+1
       
     }
@@ -109,14 +114,16 @@ plotHillClimberRestart <- function(toBePlotted, runs, totalIterations, rroutes) 
       plotted = plotted+1
       
     } else {
+      #plot(read.table(file, header=FALSE, sep="\t"), type='l', col=mycols[j],
+      #     yaxt="n", xaxt = "n", xlab="", ylab="")
+      #axis(2, cex.axis=1.25)
+      #axis(1, cex.axis=1.5)
+      #mtext("State", side=1, line=2.2, cex=1.5)
+      #mtext("Profit (€mln)", side=2, line=2.2, cex=1.5)
+      #title(main=, "Hill Climber Restart Scores", cex.main=2)
       plot(read.table(file, header=FALSE, sep="\t"), type='l', col=mycols[j],
-           yaxt="n", xaxt = "n", xlab="", ylab="")
-      axis(2, cex.axis=1.25)
-      axis(1, cex.axis=1.5)
-      mtext("State", side=1, line=2.2, cex=1.5)
-      mtext("Profit (€mln)", side=2, line=2.2, cex=1.5)
-      title(main=, "Hill Climber Restart Scores", cex.main=2)
-      
+           main="Hill Climber Restart Scores",
+           xlab="State", ylab="Profit (€mln)")
       plotted = plotted+1
       
     }
@@ -131,7 +138,7 @@ runs = 50
 totalIterations = "2000000"
 randomroutes = 100
 
-plotHillClimber(4, runs, totalIterations, randomroutes)
+plotHillClimber(3, runs, totalIterations, randomroutes)
 plotHillClimberRestart(1, runs, totalIterations, randomroutes)
 
 plotSimulatedAnnealing <- function(temperature, coolingRate, numLines, toBePlotted) {
@@ -180,14 +187,16 @@ plotSimulatedAnnealing <- function(temperature, coolingRate, numLines, toBePlott
       plotted = plotted+1
       
     } else {
+      #plot(read.table(file, header=FALSE, sep="\t"), type='l', col=mycols[j],
+      #     yaxt="n", xaxt = "n", xlab="", ylab="", ylim=c(7, 12.5))
+      #axis(2, cex.axis=1.25)
+      #axis(1, cex.axis=1.5)
+      #mtext("State", side=1, line=2.2, cex=1.5)
+      #mtext("Profit (€mln)", side=2, line=2.2, cex=1.5)
+      #title(main=, "Simulated Annealing Scores", cex.main=2)
       plot(read.table(file, header=FALSE, sep="\t"), type='l', col=mycols[j],
-           yaxt="n", xaxt = "n", xlab="", ylab="", ylim=c(7, 12.5))
-      axis(2, cex.axis=1.25)
-      axis(1, cex.axis=1.5)
-      mtext("State", side=1, line=2.2, cex=1.5)
-      mtext("Profit (€mln)", side=2, line=2.2, cex=1.5)
-      title(main=, "Simulated Annealing Scores", cex.main=2)
-      
+           ylim=c(7,12.5), main="Simulated Annealing Scores",
+           xlab="State", ylab="Profit (€mln)")
       plotted = plotted+1
       
     }
