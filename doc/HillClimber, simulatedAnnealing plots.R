@@ -110,7 +110,7 @@ plotHillClimberRestart <- function(toBePlotted, runs, totalIterations, rroutes) 
       
     } else {
       plot(read.table(file, header=FALSE, sep="\t"), type='l', col=mycols[j],
-           yaxt="n", xaxt = "n", xlab="", ylab="", ylim=c(7, 12.5))
+           yaxt="n", xaxt = "n", xlab="", ylab="")
       axis(2, cex.axis=1.25)
       axis(1, cex.axis=1.5)
       mtext("State", side=1, line=2.2, cex=1.5)
