@@ -131,7 +131,7 @@ runs = 50
 totalIterations = "2000000"
 randomroutes = 100
 
-plotHillClimber(1, runs, totalIterations, randomroutes)
+plotHillClimber(4, runs, totalIterations, randomroutes)
 plotHillClimberRestart(1, runs, totalIterations, randomroutes)
 
 plotSimulatedAnnealing <- function(temperature, coolingRate, numLines, toBePlotted) {
