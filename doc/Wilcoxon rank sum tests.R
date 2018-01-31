@@ -1,14 +1,15 @@
 setwd("C:/workspace/heuristic/doc")
 source("data.r")
 
+var(hillclimber); var(hillclimberrestart); var(simulated)
+#Wilcox.test assumes equal variances, which is only approximately true for the latter two
+
 #Hillclimber, Hillclimber restart
 #H0: hillclimber = hillclimberrestart
 #H1: hillclimber > hillclimberrestart
 wilcox.test(hillclimber, hillclimberrestart, alternative="greater") #p-value=(almost)1 
-# not very useful test
 
 wilcox.test(hillclimber, simulated, alternative="greater") #p-value=(almost)1 
-# not very useful test
 
 #H1: hillclimberrestart > hillclimber
 # reject H0, H1 likely
