@@ -19,15 +19,15 @@ public class Main {
 	public enum Algorithm {Random, HillClimber, HillClimberRestart, SimulatedAnnealing,
 		HomeBase}
 	
-	public static final Algorithm ALGORITHM = Algorithm.HomeBase;
-	public static final boolean WRITE_TO_FILE = true;
-	public static final int 	NR_RUNS = 1,
-								TOTAL_ITERATIONS=40000,
+	public static final Algorithm ALGORITHM = Algorithm.SimulatedAnnealing;
+	public static final boolean WRITE_TO_FILE = false;
+	public static final int 	NR_RUNS = 50,
+								TOTAL_ITERATIONS=2000000,
 								NO_IMPROVEMENT_ITERATIONS = 1000,
 								NUM_RANDOM_ROUTES = 100;
 								
 	//Simulated Annealing parameters
-	public static final int TEMPERATURE = 163048;
+	public static final int 	TEMPERATURE = 163048;
 	public static final double	COOLING_RATE = 0.0003;
 
 	public static final long 	SEED = 441287210;
