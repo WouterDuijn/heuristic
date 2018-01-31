@@ -23,27 +23,18 @@ for(i in 1:length(cities)) {
       p <- wilcox.test(eval(parse(text = city1))$V1, eval(parse(text = city2))$V1, alternative="greater")$p.value
       pvalues[[i,j]] = p
     }
-
   }
 }
 
-alpha <- 0.01
+alpha <- 0.03
 best_profits_city <- cities[1]
 
 for(i in 1:nrow(pvalues)) {
-  for(j in 1: ncol(pvalues)) {
-    if(i != j) {
-      # if P-value of city1 to city2 > alpha, we do not reject H0 so distr. might be same -> check other way around
-      if(pvalues[[i,j]] > alpha) {
-        if(pvalues[j,i] <= alpha) { #then city2 profits > city1 profits
-          best_profits_city = cities[j]
-        }
-      }
-    }
-    
+  # if H0 for city i is never rejected (thus larger profits) in test versus all other cities, city i is best
+  if(sum(pvalues[i,]<alpha, na.rm=TRUE) == length(cities)-1) {
+    best_profits_city = cities[i]
   }
+  
 }
-print(best_profits_city)
-
-
-
+print(best_profits_city)            #Reykjavik
+match(best_profits_city, cities)-1  #id=21
