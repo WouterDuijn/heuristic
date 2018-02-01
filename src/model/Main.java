@@ -19,12 +19,30 @@ public class Main {
 	public enum Algorithm {Random, HillClimber, HillClimberRestart, SimulatedAnnealing,
 		HomeBase}
 	
-	public static final Algorithm ALGORITHM = Algorithm.SimulatedAnnealing;
-	public static final boolean WRITE_TO_FILE = true;
+	//Input path of the input files
+	public static final String INPUT_PATH = "C:\\workspace\\heuristic\\inp\\";
+	
+	//Specify the algorithm, nr of runs and the total iterations
+	public static final Algorithm ALGORITHM = Algorithm.HillClimber;
 	public static final int 	NR_RUNS = 50,
-								TOTAL_ITERATIONS=2000000,
-								NO_IMPROVEMENT_ITERATIONS = 1000,
-								NUM_RANDOM_ROUTES = 100;
+								TOTAL_ITERATIONS=2000000;
+	
+	//For Hillcimber Restart: specifies the number of iterations without improvement 
+	//to start new schedule
+	public static final int NO_IMPROVEMENT_ITERATIONS = 1000;
+	
+	//Specifies the number of random routes for the random algorithm generated
+	//(best is drawn for these routes)
+	public static final int	NUM_RANDOM_SCHEDULES = 1000;
+	
+	
+	//option to speicify whether the results should be printen to file
+	public static final boolean WRITE_TO_FILE = false;
+	
+	//options when initial schedule needs to be withing boundary
+	public static final boolean RANDOM_SCHEDULE_RANGE=false;
+	public static final int LOWERBOUND = 3000000;
+	public static final int UPPERBOUND = 3500000;
 								
 	//Simulated Annealing parameters
 	public static final int TEMPERATURE = 163048;
@@ -52,7 +70,7 @@ public class Main {
 	}
 
 	Schedule SimulatedAnnealing(Cities cities, Matrix matrix, City homebase, boolean write_to_file,
-			int temperature, double cooling_rate) {
+			boolean range, int temperature, double cooling_rate) {
 		Vector<Schedule> optimal_schedules = new Vector<Schedule>();
 
 		try {
@@ -69,13 +87,13 @@ public class Main {
 				}
 				
 				// Initialize initial solution
-				Schedule current_schedule = new Schedule(RandomModel(rn, homebase, cities, 
-						new Matrix(matrix)));
+				Schedule current_schedule = new Schedule(RandomSchedule(rn, homebase, cities, 
+						new Matrix(matrix), range, LOWERBOUND, UPPERBOUND));
 				// Set the initial solution as current best
 				Schedule best_schedule = new Schedule(current_schedule); 
 
 				double temp = temperature;
-			
+	
 				//int num_accepted_mutations = 0;
 				int iteration=0;
 
@@ -127,7 +145,8 @@ public class Main {
 		return best;
 	}
 
-	Schedule HillClimber(Cities cities, City homebase, Matrix matrix, boolean write_to_file) { 
+	Schedule HillClimber(Cities cities, City homebase, Matrix matrix, boolean write_to_file,
+			boolean range) { 
 
 		Vector<Schedule> optimal_schedules = new Vector<Schedule>();
 		Vector<FileWriter> filewriters = new Vector<FileWriter>();
@@ -139,13 +158,14 @@ public class Main {
 				if(write_to_file) {
 					String filename = "C:\\workspace\\heuristic\\HillClimber\\HC_Schedule_"
 							+ (k+1) + "_runs_" + NR_RUNS + "_total_iterations_"
-							+ TOTAL_ITERATIONS + "_randomroutes_" + NUM_RANDOM_ROUTES + ".txt";
+							+ TOTAL_ITERATIONS + "_randomroutes_" + NUM_RANDOM_SCHEDULES + ".txt";
 					filewriters.add(new FileWriter(new File(filename)));
 					filewriter = filewriters.lastElement();
 				}
 				
 				//Set starting schedule for hill climb run
-				Schedule current_schedule = new Schedule(RandomModel(rn, homebase, cities, new Matrix(matrix)));
+				Schedule current_schedule = new Schedule(RandomSchedule(rn, homebase, cities, new Matrix(matrix),
+						range, LOWERBOUND, UPPERBOUND));
 				int iteration = 0;
 				while(iteration< TOTAL_ITERATIONS/NR_RUNS) {
 					Schedule s = new Schedule(current_schedule);
@@ -184,7 +204,8 @@ public class Main {
 		return best;
 	}
 	
-	Schedule HillClimberRestartModel(Random random, Cities cities, City homebase, Matrix matrix, boolean write_to_file) { 
+	Schedule HillClimberRestartModel(Random random, Cities cities, City homebase, Matrix matrix, 
+			boolean write_to_file, boolean range) { 
 
 		Vector<Schedule> optimal_schedules = new Vector<Schedule>();
 		Vector<FileWriter> filewriters = new Vector<FileWriter>();
@@ -195,14 +216,14 @@ public class Main {
 				if(write_to_file) {
 					String filename = "C:\\workspace\\heuristic\\HillClimberRestart\\HCRestart_" + (k+1)
 							+ "_runs_" + NR_RUNS + "_total_iterations_"
-							+ TOTAL_ITERATIONS + "_randomroutes_" + NUM_RANDOM_ROUTES + ".txt";
+							+ TOTAL_ITERATIONS + "_randomroutes_" + NUM_RANDOM_SCHEDULES + ".txt";
 							filewriters.add(new FileWriter(new File(filename)));
 					filewriter = filewriters.lastElement();
 				}
 				
 				// Hill climbing algorithm 
-				Schedule current_schedule = new Schedule(RandomModel(random, homebase, 
-						cities, new Matrix(matrix)));
+				Schedule current_schedule = new Schedule(RandomSchedule(random, homebase, 
+						cities, new Matrix(matrix), range, LOWERBOUND, UPPERBOUND));
 				Schedule best_schedule = new Schedule(current_schedule);
 				int iteration = 0;
 				int no_improvement_iterations = 0;
@@ -235,8 +256,8 @@ public class Main {
 					
 					if(no_improvement_iterations>NO_IMPROVEMENT_ITERATIONS) {
 						no_improvement_iterations=0;
-						current_schedule = new Schedule(RandomModel(random, homebase, cities, 
-								new Matrix(matrix)));
+						current_schedule = new Schedule(RandomSchedule(random, homebase, cities, 
+								new Matrix(matrix), range, LOWERBOUND, UPPERBOUND));
 					}
 				}
 				optimal_schedules.add(best_schedule);
@@ -266,53 +287,62 @@ public class Main {
 		out.printf("Total profit\t€%.2f\n", schedule.Profit());
 	}
 
-	Schedule RandomModel(Random rngen, City homebase, Cities cities, Matrix inputMatrix) {
-		Schedule schedule = new Schedule(inputMatrix);
+	Schedule RandomSchedule(Random rngen, City homebase, Cities cities, Matrix inputMatrix,
+			boolean range, int lower, int upper) {
+		boolean schedule_found=false;
 		
-		for(int k=0; k<Schedule.NR_PLANES;k++) {
-			Route optimalRoute =new Route();
-			for(int j = 0; j<NUM_RANDOM_ROUTES; j++){ 
-				int randomStartCity = rngen.nextInt(cities.size());
-				Route route = new Route(cities.getCity(randomStartCity), homebase.ID());
-				Matrix matrix = new Matrix(schedule.Matrix());
+		while(!schedule_found) {
+			Schedule schedule = new Schedule(inputMatrix);
+			for(int k=0; k<Schedule.NR_PLANES;k++) {
+				Route optimalRoute =new Route();
+				for(int j = 0; j<NUM_RANDOM_SCHEDULES; j++){ 
+					int randomStartCity = rngen.nextInt(cities.size());
+					Route route = new Route(cities.getCity(randomStartCity), homebase.ID());
+					Matrix matrix = new Matrix(schedule.Matrix());
 
-				for(int i = 0; i<200; i++){ // to create 1 route
-					Route cur_route= new Route(route);
-					Matrix cur_matrix = new Matrix(matrix);
-					City city = cities.getCity(rngen.nextInt(cities.size()));
+					for(int i = 0; i<200; i++){ // to create 1 route
+						Route cur_route= new Route(route);
+						Matrix cur_matrix = new Matrix(matrix);
+						City city = cities.getCity(rngen.nextInt(cities.size()));
 
-					if(cur_route.getCities().size()<3){
-						if(randomStartCity!=homebase.ID()){
-							//Set to homebase
-							city = cities.getCity(homebase.ID());
+						if(cur_route.getCities().size()<3){
+							if(randomStartCity!=homebase.ID()){
+								//Set to homebase
+								city = cities.getCity(homebase.ID());
+							}
 						}
+
+						if(cur_route.CityPresent(city)) {
+							continue;
+						}
+
+						boolean valid_city_insert = cur_route.AddCity(city, cur_matrix, rngen);
+
+						//If the city insertion in route is valid. Then update the route
+						if(valid_city_insert) {
+							route = new Route(cur_route);
+							matrix = new Matrix(cur_matrix);
+							j++;
+
+						}
+						route.CheckValidity();
 					}
 
-					if(cur_route.CityPresent(city)) {
-						continue;
+					//If the constructed route is better than current optimalRoute update the optimalRoute
+					if(route.profit > optimalRoute.profit){
+						//optimalRoute = route;
+						optimalRoute = new Route(route);
 					}
-
-					boolean valid_city_insert = cur_route.AddCity(city, cur_matrix, rngen);
-
-					//If the city insertion in route is valid. Then update the route
-					if(valid_city_insert) {
-						route = new Route(cur_route);
-						matrix = new Matrix(cur_matrix);
-						j++;
-
-					}
-					route.CheckValidity();
-				}
-
-				//If the constructed route is better than current optimalRoute update the optimalRoute
-				if(route.profit > optimalRoute.profit){
-					//optimalRoute = route;
-					optimalRoute = new Route(route);
-				}	
-			}			
-			schedule.AddRoute(optimalRoute);			
+				}			
+				schedule.AddRoute(optimalRoute);			
+			}
+			if(!range) {
+				return schedule;
+			}else if(schedule.Profit() > lower && schedule.Profit() < upper) {
+				return schedule;
+			}
 		}
-		return schedule;
+		return new Schedule();
 	}
 
 	Schedule bestHometownSchedule(Cities cities, Matrix matrix) {
@@ -321,7 +351,8 @@ public class Main {
 		for(int i=0; i<cities.size(); i++) {
 			City homebase = cities.getCity(i);
 			Random rngen = new Random(SEED);
-			Schedule current_schedule = HillClimberRestartModel(rngen, cities, homebase, matrix, false);
+			Schedule current_schedule = HillClimberRestartModel(rngen, cities, homebase, matrix, 
+					WRITE_TO_FILE, RANDOM_SCHEDULE_RANGE);
 			// TODO: use simulatedAnnealing (with parameter rngen) to determine best hometown?
 			//Schedule current_schedule = SimulatedAnnealing(rngen, ...)
 			if(current_schedule.Profit()>best_schedule.Profit()) {
@@ -333,30 +364,32 @@ public class Main {
 
 	void start() {
 		//Parse input files
-		Parser parser = new Parser();
+		Parser parser = new Parser(INPUT_PATH);
 		Cities cities = parser.ParseCities();
 		Matrix matrix = parser.ParseMatrices(cities.size());
 		
+		//Execute the algorithm and retrieve the best schedule
 		Schedule schedule = new Schedule();
-		
-		long time = System.currentTimeMillis();
 		switch(ALGORITHM) {
 		case Random:
 			System.out.println("Running the random model");
-			schedule = RandomModel(rn, cities.getCity(0), cities, matrix);
+			schedule = RandomSchedule(rn, cities.getCity(0), cities, matrix, 
+					RANDOM_SCHEDULE_RANGE, LOWERBOUND,UPPERBOUND);
 			break;
 		case HillClimber:
 			out.println("Running the hill climbing model");
-			schedule = HillClimber(cities, cities.getCity(0), matrix,WRITE_TO_FILE);
+			schedule = HillClimber(cities, cities.getCity(0), matrix,WRITE_TO_FILE, 
+					RANDOM_SCHEDULE_RANGE);
 			break;
 		case HillClimberRestart:
 			out.println("Running the hill climbing model with restart");
-			schedule = HillClimberRestartModel(rn, cities, cities.getCity(0),matrix, WRITE_TO_FILE);
+			schedule = HillClimberRestartModel(rn, cities, cities.getCity(0),matrix, WRITE_TO_FILE,
+					RANDOM_SCHEDULE_RANGE);
 			break;
 		case SimulatedAnnealing:
 			out.println("Running the simulated annealing model");
 			schedule = SimulatedAnnealing(cities, matrix, cities.getCity(0), WRITE_TO_FILE,
-					TEMPERATURE, COOLING_RATE);
+					RANDOM_SCHEDULE_RANGE, TEMPERATURE, COOLING_RATE);
 			break;
 		case HomeBase:
 			out.println("Searching for the best hometown...\n");
@@ -365,8 +398,6 @@ public class Main {
 			out.printf("The best hometown is %s\n", best_homebase.toString());
 			break;
 		}
-		
-		out.println("Total time: " +((System.currentTimeMillis()-time)/1000) );
 		
 		//Print and visualize best schedule
 		printSchedule(schedule);
